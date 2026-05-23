@@ -1,0 +1,41 @@
+{
+  "name": "HelloPepo — Free APK Downloads",
+  "short_name": "HelloPepo",
+  "description": "Bangladesh's best free APK store — games, apps, mods & more!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e1a",
+  "theme_color": "#00e676",
+  "orientation": "portrait-primary",
+  "lang": "bn",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0e1a'/%3E%3Crect x='8' y='8' width='176' height='176' rx='34' fill='none' stroke='%2300e676' stroke-width='3' opacity='0.3'/%3E%3Ctext x='96' y='120' text-anchor='middle' font-size='90' font-family='system-ui'%3E📦%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230a0e1a'/%3E%3Crect x='12' y='12' width='488' height='488' rx='90' fill='none' stroke='%2300e676' stroke-width='6' opacity='0.3'/%3E%3Ctext x='256' y='330' text-anchor='middle' font-size='260' font-family='system-ui'%3E📦%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "entertainment"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Browse Apps",
+      "short_name": "Apps",
+      "description": "সব apps দেখো",
+      "url": "/#apps"
+    },
+    {
+      "name": "Telegram",
+      "short_name": "Telegram",
+      "description": "Telegram channel এ join করো",
+      "url": "https://t.me/AraFaaaah"
+    }
+  ]
+}
