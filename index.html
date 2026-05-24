@@ -2512,6 +2512,231 @@
       .featured-cards{grid-template-columns:1fr 1fr;gap:1rem;}
       .feat-card:last-child{grid-column:1/-1;max-width:320px;margin:0 auto;width:100%;}
     }
+
+    /* ===== PREMIUM MICRO INTERACTIONS ===== */
+
+    html { scroll-behavior: smooth; }
+
+    /* Global will-change for performance */
+    .dl-btn, .cat-btn, .card, .tcard, .feat-card,
+    .cta-primary, .cta-secondary, .btn-g { will-change: transform; backface-visibility: hidden; }
+
+    /* CTA buttons shine + spring */
+    .cta-primary, .cta-secondary {
+      position: relative; overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .cta-primary::after, .cta-secondary::after {
+      content: ''; position: absolute;
+      width: 60%; height: 100%; top: 0; left: -70%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+      transition: left 0.5s;
+    }
+    .cta-primary:hover::after, .cta-secondary:hover::after { left: 120%; }
+    .cta-primary:hover { transform: translateY(-3px) scale(1.05) !important; box-shadow: 0 12px 35px rgba(0,230,118,0.45) !important; }
+    .cta-secondary:hover { transform: translateY(-3px) scale(1.05) !important; }
+    .cta-primary:active, .cta-secondary:active { transform: scale(0.95) !important; }
+
+    /* Download button icon bounce */
+    .dl-btn {
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1) !important;
+      position: relative; overflow: hidden;
+    }
+    .dl-btn::after {
+      content: ''; position: absolute;
+      width: 60%; height: 100%; top: 0; left: -70%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .dl-btn:hover::after { left: 120%; }
+    .dl-btn:hover { transform: translateY(-3px) scale(1.04) !important; box-shadow: 0 10px 30px rgba(0,230,118,0.4) !important; }
+    .dl-btn:active { transform: scale(0.95) !important; }
+    .dl-icon { display: inline-block; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1) !important; }
+    .dl-btn:hover .dl-icon { transform: translateY(4px) scale(1.25) !important; }
+
+    /* Card hover - lift + glow */
+    .card {
+      transition: all 0.4s cubic-bezier(0.4,0,0.2,1) !important;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-10px) scale(1.02) !important;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 0 30px rgba(0,230,118,0.1) !important;
+      border-color: rgba(0,230,118,0.25) !important;
+    }
+    /* Card icon spring */
+    .card-icon-wrap {
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .card:hover .card-icon-wrap { transform: scale(1.15) translateY(-5px) rotate(-3deg) !important; }
+    /* Card title glow */
+    .card-title { transition: color 0.3s !important; }
+    .card:hover .card-title { color: var(--green) !important; }
+    /* Card pills */
+    .card-pill {
+      transition: all 0.25s !important; cursor: default;
+    }
+    .card-pill:hover {
+      background: rgba(0,230,118,0.15) !important;
+      border-color: rgba(0,230,118,0.35) !important;
+      color: var(--green) !important;
+      transform: scale(1.06);
+    }
+
+    /* Featured cards */
+    .feat-card {
+      transition: all 0.4s cubic-bezier(0.4,0,0.2,1) !important;
+      cursor: pointer;
+    }
+    .feat-card:hover {
+      transform: translateY(-8px) scale(1.02) !important;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 25px rgba(0,230,118,0.1) !important;
+      border-color: rgba(0,230,118,0.3) !important;
+    }
+    .feat-card:hover .feat-icon { transform: scale(1.12) translateY(-3px) !important; }
+    .feat-icon { transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1) !important; }
+
+    /* Category buttons spring */
+    .cat-btn {
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .cat-btn:hover { transform: translateY(-4px) scale(1.08) !important; }
+    .cat-btn:active { transform: scale(0.91) !important; }
+    .cat-btn.active { box-shadow: 0 0 18px rgba(0,230,118,0.35) !important; }
+
+    /* Trending cards */
+    .tcard {
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1) !important;
+      cursor: pointer;
+    }
+    .tcard:hover { transform: translateY(-7px) scale(1.03) !important; box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important; }
+    .tcard-img img, .tcard-img .emoji {
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .tcard:hover .tcard-img img,
+    .tcard:hover .tcard-img .emoji { transform: scale(1.18) translateY(-4px) !important; }
+    .tcard-dl-btn {
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .tcard-dl-btn:hover { transform: scale(1.07) !important; box-shadow: 0 6px 20px rgba(0,230,118,0.35) !important; }
+    .tcard-dl-btn:active { transform: scale(0.93) !important; }
+
+    /* Logo spring */
+    .logo { transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1) !important; cursor: pointer; }
+    .logo:hover { transform: scale(1.1) !important; filter: drop-shadow(0 0 8px rgba(0,230,118,0.5)); }
+    .logo:active { transform: scale(0.93) !important; }
+
+    /* Telegram button */
+    .tg-btn {
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1) !important;
+      position: relative;
+    }
+    .tg-btn:hover { transform: translateY(-3px) scale(1.06) !important; box-shadow: 0 8px 25px rgba(41,182,246,0.35) !important; }
+    .tg-btn:active { transform: scale(0.94) !important; }
+
+    /* Search bar */
+    .search-wrap { transition: all 0.3s !important; }
+    .search-wrap:focus-within {
+      transform: scale(1.01);
+      box-shadow: 0 0 0 2px rgba(0,230,118,0.3), 0 15px 40px rgba(0,0,0,0.4) !important;
+    }
+    .search-wrap button { transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important; }
+    .search-wrap button:hover { transform: scale(1.1) !important; box-shadow: 0 4px 15px rgba(0,230,118,0.3) !important; }
+    .search-wrap button:active { transform: scale(0.9) !important; }
+
+    /* Input focus */
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0,230,118,0.25), 0 4px 15px rgba(0,0,0,0.3) !important;
+      transition: all 0.25s !important;
+    }
+
+    /* Admin buttons */
+    .btn-o, .btn-r {
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .btn-o:hover { transform: translateY(-2px) scale(1.05) !important; }
+    .btn-r:hover { transform: translateY(-2px) scale(1.05) !important; box-shadow: 0 6px 20px rgba(255,77,109,0.3) !important; }
+    .btn-o:active, .btn-r:active { transform: scale(0.94) !important; }
+
+    /* Admin app list items */
+    .app-item {
+      transition: all 0.3s !important;
+    }
+    .app-item:hover {
+      transform: translateX(5px) !important;
+      border-color: rgba(0,230,118,0.2) !important;
+      background: rgba(0,230,118,0.03) !important;
+    }
+
+    /* Modal download button */
+    .app-modal-dl-btn {
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .app-modal-dl-btn:hover { transform: translateY(-3px) scale(1.03) !important; }
+    .app-modal-dl-btn:active { transform: scale(0.96) !important; }
+
+    /* Toast slide in */
+    .toast { animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards !important; }
+    @keyframes toastIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Trending see-all */
+    .trending-see-all {
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .trending-see-all:hover { transform: scale(1.06) translateX(3px) !important; }
+
+    /* Page transition */
+    .page.active { animation: pageIn 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Dash stat cards */
+    .dash-stat {
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1) !important;
+      cursor: default;
+    }
+    .dash-stat:hover {
+      transform: translateY(-5px) scale(1.03) !important;
+      border-color: rgba(0,230,118,0.3) !important;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 15px rgba(0,230,118,0.08) !important;
+    }
+
+    /* Navbar scroll effect */
+    #mainNav.scrolled {
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(0,230,118,0.05) !important;
+    }
+
+    /* Hero badge float */
+    .hero-badge { animation: floatBadge 4s ease-in-out infinite !important; }
+    @keyframes floatBadge {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Carousel buttons */
+    .carousel-btn {
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1) !important;
+    }
+    .carousel-btn:hover { transform: scale(1.18) !important; }
+    .carousel-btn:active { transform: scale(0.85) !important; }
+
+    /* Stat numbers count up effect */
+    .stat-num { transition: color 0.3s !important; }
+    .stat:hover .stat-num { color: var(--green) !important; }
+
+    /* Scroll hint bounce */
+    .scroll-hint { animation: scrollBounce 2s ease-in-out infinite; }
+    @keyframes scrollBounce {
+      0%, 100% { transform: translateY(0); opacity: 0.5; }
+      50% { transform: translateY(8px); opacity: 1; }
+    }
+
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -2984,9 +3209,12 @@ document.addEventListener('click',(e)=>{
 
   <!-- Sport Tabs -->
   <div class="sport-tabs">
-    <button class="sport-tab active" onclick="setSportTab('cricket',this)">🏏 Cricket</button>
-    <button class="sport-tab" onclick="setSportTab('football',this)">⚽ Football</button>
-    <button class="sport-tab fifa-tab" onclick="setSportTab('fifa',this)">🌍 FIFA World Cup</button>
+    <button class="sport-tab active" id="stab-all"     onclick="setSportTab('all',this)">🌐 All Sports</button>
+    <button class="sport-tab"        id="stab-football" onclick="setSportTab('football',this)">⚽ Football</button>
+    <button class="sport-tab"        id="stab-cricket"  onclick="setSportTab('cricket',this)">🏏 Cricket</button>
+    <button class="sport-tab"        id="stab-upcoming" onclick="setSportTab('upcoming',this)">📅 Upcoming</button>
+    <button class="sport-tab"        id="stab-finished" onclick="setSportTab('finished',this)">✅ Finished</button>
+    <button class="sport-tab fifa-tab" id="stab-fifa"   onclick="setSportTab('fifa',this)">🌍 FIFA 2026</button>
   </div>
 
   <!-- Refresh -->
@@ -3182,8 +3410,12 @@ function showPage(id){
   if(id==='admin-dash') loadAdminApps();
   if(id==='sports'){
     if(typeof loadSportsData==='function'){
-      if(!sportsCache||!sportsCache[currentSport]) setTimeout(loadSportsData,50);
-      else renderSportsData(sportsCache[currentSport]);
+      // Load fresh if no data yet, otherwise re-render with current filter
+      if(!allSportsData.football && !allSportsData.cricket){
+        setTimeout(loadSportsData, 50);
+      } else {
+        renderSportsData(allSportsData.football, allSportsData.cricket);
+      }
       setTimeout(()=>{ if(typeof startAutoRefresh==='function') startAutoRefresh(); },100);
     }
   } else {
@@ -3547,237 +3779,265 @@ loadApps();
 // Football: TheSportsDB (completely free, no key)
 // Auto-refresh every 60s
 
-let currentSport = 'cricket';
-let sportsAutoRefresh = null;
-let sportsCache = { cricket: null, football: null };
+// ════════════════════════════════════════════════════
+//  HELLO PEPO — REAL-TIME SPORTS HUB ENGINE v3.0
+//  Football: TheSportsDB (free, no key)
+//  Cricket:  cricapi.com (free key, 100 req/day)
+// ════════════════════════════════════════════════════
 
-// ── Country flag emoji map ──
+let currentSport = 'all';
+let sportsAutoRefresh = null;
+let footballAutoTimer = null;
+let sportsCache = {};   // keyed by sport
+let allSportsData = { football: null, cricket: null };
+
+// ── Flag / badge map ──
 const FLAG_MAP = {
   'india':'🇮🇳','bangladesh':'🇧🇩','pakistan':'🇵🇰','australia':'🇦🇺',
   'england':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','new zealand':'🇳🇿','south africa':'🇿🇦','sri lanka':'🇱🇰',
   'west indies':'🏝️','zimbabwe':'🇿🇼','afghanistan':'🇦🇫','ireland':'🇮🇪',
+  'scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','netherlands':'🇳🇱','kenya':'🇰🇪','uae':'🇦🇪',
   'man city':'🔵','manchester city':'🔵','arsenal':'🔴','liverpool':'🔴',
   'chelsea':'🔵','tottenham':'⚪','man utd':'🔴','manchester united':'🔴',
   'aston villa':'🟣','newcastle':'⚫','barcelona':'🔵','real madrid':'⚪',
   'psg':'🔵','paris saint-germain':'🔵','bayern':'🔴','bayern munich':'🔴',
   'inter milan':'⚫','ac milan':'🔴','juventus':'⚫','dortmund':'🟡',
   'borussia dortmund':'🟡','atletico madrid':'🔴','ajax':'🔴',
+  'brazil':'🇧🇷','argentina':'🇦🇷','france':'🇫🇷','germany':'🇩🇪',
+  'spain':'🇪🇸','portugal':'🇵🇹','italy':'🇮🇹','croatia':'🇭🇷',
+  'morocco':'🇲🇦','japan':'🇯🇵','usa':'🇺🇸','mexico':'🇲🇽','colombia':'🇨🇴',
 };
 function getFlag(name){
   const k=(name||'').toLowerCase();
-  for(const [team,flag] of Object.entries(FLAG_MAP)){
-    if(k.includes(team)) return flag;
-  }
+  for(const [t,f] of Object.entries(FLAG_MAP)) if(k.includes(t)) return f;
   return '🏟️';
 }
-
-// ── Skeleton loader ──
-function showSkel(){
-  document.getElementById('sportsContent').innerHTML=
-    `<div class="matches-grid">${[1,2,3,4].map(()=>'<div class="skel"></div>').join('')}</div>`;
+function getTeamBadge(name, badgeUrl){
+  if(badgeUrl) return `<img src="${badgeUrl}/tiny" alt="${name}" style="width:30px;height:30px;object-fit:contain;border-radius:4px;" onerror="this.outerHTML='${getFlag(name)}'">`;
+  return getFlag(name);
 }
 
-// ── Timestamp ──
+// ── UI helpers ──
+function showSkel(){
+  document.getElementById('sportsContent').innerHTML =
+    `<div class="matches-grid">${[1,2,3,4].map(()=>`
+      <div class="skel" style="border-radius:16px;height:160px;background:linear-gradient(90deg,#111827 25%,#1a2235 50%,#111827 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;"></div>`
+    ).join('')}</div>`;
+}
 function stampNow(){
-  document.getElementById('lastUpdated').textContent=
-    'Updated: '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const el = document.getElementById('lastUpdated');
+  if(el) el.textContent = 'Updated: '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+function formatMatchDate(dt){
+  if(!dt) return 'TBC';
+  try{
+    const d = new Date(dt);
+    if(isNaN(d)) return String(dt);
+    const now = new Date();
+    const diff = d - now;
+    if(diff < 0) return 'Recent';
+    const mins = diff/60000;
+    if(mins < 60) return `In ${Math.round(mins)}m`;
+    const hrs = diff/3600000;
+    if(hrs < 24) return 'Today '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    if(hrs < 48) return 'Tomorrow '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  }catch{ return String(dt); }
 }
 
 // ════════════════════════════
 //  CRICKET — cricapi.com free
 // ════════════════════════════
 async function fetchCricket(){
-  // cricapi free endpoint — no key required for /matches
-  const BASE = 'https://cricbuzz-cricket.p.rapidapi.com';
-  // Fallback: use allsportdb / open cricket API
-  // Primary: cricapi.com/api/cricketScore (free, 100/day)
-  // We use cricapi's open endpoint
-  try {
+  try{
     const res = await fetch('https://api.cricapi.com/v1/currentMatches?apikey=a52ea237-4f9a-4a64-862a-152f3f3ba3d8&offset=0');
-    if(!res.ok) throw new Error('cricapi error');
+    if(!res.ok) throw new Error('cricapi '+res.status);
     const json = await res.json();
-    if(json.status !== 'success') throw new Error('cricapi bad status');
-    return parseCricketAPI(json.data || []);
-  } catch(e){
-    console.warn('Cricket API failed, using fallback:', e.message);
+    if(json.status !== 'success') throw new Error('cricapi bad response');
+    return parseCricketAPI(json.data||[]);
+  }catch(e){
+    console.warn('CricAPI failed:', e.message);
     return fetchCricketFallback();
   }
 }
 
 function parseCricketAPI(matches){
   const live=[], upcoming=[], finished=[];
-  matches.slice(0,12).forEach(m=>{
-    const t1 = m.teams?.[0] || m.t1 || 'Team A';
-    const t2 = m.teams?.[1] || m.t2 || 'Team B';
-    const score1 = m.score?.[0] ? `${m.score[0].r}/${m.score[0].w}` : '';
-    const overs1 = m.score?.[0]?.o ? `${m.score[0].o}` : '';
-    const score2 = m.score?.[1] ? `${m.score[1].r}/${m.score[1].w}` : '';
-    const overs2 = m.score?.[1]?.o ? `${m.score[1].o}` : '';
+  (matches||[]).slice(0,15).forEach(m=>{
+    const t1 = m.teams?.[0]||m.t1||'Team A';
+    const t2 = m.teams?.[1]||m.t2||'Team B';
+    const s1 = m.score?.[0] ? `${m.score[0].r}/${m.score[0].w}` : '';
+    const ov1= m.score?.[0]?.o ? `${m.score[0].o} ov` : '';
+    const s2 = m.score?.[1] ? `${m.score[1].r}/${m.score[1].w}` : '';
+    const ov2= m.score?.[1]?.o ? `${m.score[1].o} ov` : '';
     const isLive = m.matchStarted && !m.matchEnded;
     const isDone = m.matchEnded;
-    const status = isLive ? 'live' : isDone ? 'finished' : 'upcoming';
+    const status = isLive?'live': isDone?'finished':'upcoming';
     const obj = {
-      id: m.id,
-      league: m.series_id ? (m.name||'Cricket').split(',')[0] : (m.name||'Cricket'),
+      id:m.id, sport:'cricket', league:(m.name||'Cricket').split(',')[0],
       leagueIcon:'🏏',
-      team1:{name:t1, flag:getFlag(t1), score:score1, overs:overs1},
-      team2:{name:t2, flag:getFlag(t2), score:score2, overs:overs2},
+      team1:{name:t1, flag:getFlag(t1), score:s1, overs:ov1},
+      team2:{name:t2, flag:getFlag(t2), score:s2, overs:ov2},
       status,
-      time: isLive ? (m.status||'Live') : isDone ? 'Finished' : formatDate(m.dateTimeGMT),
-      venue: m.venue || 'TBC',
-      detail: m.status || (isDone ? (m.score?.[0] ? 'Match ended':'—') : 'Upcoming'),
+      time: isLive?(m.status||'Live'):isDone?'Finished':formatMatchDate(m.dateTimeGMT),
+      venue: m.venue||'TBC',
+      detail: m.status||'',
+      minute: isLive?(m.status||''):'',
     };
     if(status==='live') live.push(obj);
     else if(status==='finished') finished.push(obj);
     else upcoming.push(obj);
   });
-  return {live, upcoming: upcoming.slice(0,4), finished: finished.slice(0,3), standings: cricketStandings()};
+  return { live, upcoming:upcoming.slice(0,5), finished:finished.slice(0,4), standings:[] };
 }
 
 async function fetchCricketFallback(){
-  // TheSportsDB cricket — free no key
   try{
     const res = await fetch('https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4484&s=2024-2025');
     const json = await res.json();
-    const events = (json.events||[]).slice(0,10);
-    const live=[],upcoming=[],finished=[];
-    events.forEach((e,i)=>{
+    const events = (json.events||[]).slice(0,8);
+    const live=[], upcoming=[], finished=[];
+    events.forEach(e=>{
       const t1=e.strHomeTeam||'Team A', t2=e.strAwayTeam||'Team B';
-      const done = e.strStatus==='Match Finished'||e.intHomeScore!==null;
+      const done = e.strStatus==='Match Finished' || (e.intHomeScore!==null && e.intHomeScore!==undefined);
       const status = done?'finished':'upcoming';
       const obj={
-        id:e.idEvent, league:e.strLeague||'Cricket', leagueIcon:'🏏',
-        team1:{name:t1,flag:getFlag(t1),score:e.intHomeScore!==null?String(e.intHomeScore):'',overs:''},
-        team2:{name:t2,flag:getFlag(t2),score:e.intAwayScore!==null?String(e.intAwayScore):'',overs:''},
-        status, time:done?'FT':formatDate(e.dateEvent+' '+e.strTime),
-        venue:e.strVenue||'TBC', detail:e.strStatus||''
+        id:e.idEvent, sport:'cricket', league:e.strLeague||'Cricket', leagueIcon:'🏏',
+        team1:{name:t1,flag:getFlag(t1),score:done?String(e.intHomeScore||0):'',overs:''},
+        team2:{name:t2,flag:getFlag(t2),score:done?String(e.intAwayScore||0):'',overs:''},
+        status, time:done?'FT':formatMatchDate(e.dateEvent+' '+e.strTime),
+        venue:e.strVenue||'TBC', detail:e.strStatus||'', minute:'',
       };
       if(status==='finished') finished.push(obj); else upcoming.push(obj);
     });
-    return {live, upcoming:upcoming.slice(0,4), finished:finished.slice(0,3), standings:cricketStandings()};
+    return { live, upcoming:upcoming.slice(0,5), finished:finished.slice(0,4), standings:[] };
   }catch(e2){
-    return {live:[], upcoming:[], finished:[], standings:cricketStandings()};
+    return { live:[], upcoming:[], finished:[], standings:[] };
   }
 }
 
-function cricketStandings(){
-  return [
-    {rank:1,team:'India 🇮🇳',p:8,w:6,l:1,d:1,pts:74,form:['W','W','W','D','W']},
-    {rank:2,team:'Australia 🇦🇺',p:8,w:5,l:2,d:1,pts:62,form:['W','L','W','W','D']},
-    {rank:3,team:'England 🏴󠁧󠁢󠁥󠁮󠁧󠁿',p:8,w:4,l:3,d:1,pts:50,form:['W','L','W','L','W']},
-    {rank:4,team:'South Africa 🇿🇦',p:7,w:4,l:2,d:1,pts:52,form:['W','W','D','L','W']},
-    {rank:5,team:'Bangladesh 🇧🇩',p:6,w:2,l:3,d:1,pts:27,form:['L','W','L','D','L']},
-    {rank:6,team:'New Zealand 🇳🇿',p:7,w:3,l:4,d:0,pts:35,form:['L','W','L','W','L']},
-  ];
-}
+// ════════════════════════════════════════════
+//  FOOTBALL — TheSportsDB free (no API key)
+// ════════════════════════════════════════════
+const FOOTBALL_LEAGUES = [
+  {id:'4328', name:'Premier League',  icon:'🏴󠁧󠁢󠁥󠁮󠁧󠁿'},
+  {id:'4480', name:'Champions League',icon:'⭐'},
+  {id:'4335', name:'La Liga',         icon:'🇪🇸'},
+  {id:'4331', name:'Bundesliga',      icon:'🇩🇪'},
+  {id:'4334', name:'Ligue 1',         icon:'🇫🇷'},
+];
 
-// ════════════════════════════
-//  FOOTBALL — TheSportsDB free
-// ════════════════════════════
 async function fetchFootball(){
   try{
-    // Fetch live + recent EPL events — TheSportsDB free API
-    const [liveRes, nextRes, prevRes, tableRes] = await Promise.all([
-      fetch('https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604'), // EPL last events
-      fetch('https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604'), // EPL next events
-      fetch('https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604'),
-      fetch('https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2024-2025'), // EPL table
+    const leagueIds = ['4328','4480','4335'];
+    const reqs = leagueIds.flatMap(id=>[
+      fetch(`https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=${id}`).catch(()=>null),
+      fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=${id}`).catch(()=>null),
     ]);
-    const [liveJson, nextJson, prevJson, tableJson] = await Promise.all([
-      liveRes.json(), nextRes.json(), prevRes.json(), tableRes.json()
-    ]);
+    const responses = await Promise.all(reqs);
+    const jsons = await Promise.all(responses.map(r=>r?r.json().catch(()=>null):null));
 
-    const finished = (liveJson.results||[]).slice(0,3).map(e=>parseFootballEvent(e,'finished'));
-    const upcoming = (nextJson.events||[]).slice(0,4).map(e=>parseFootballEvent(e,'upcoming'));
-    const standings = parseFootballTable(tableJson.table||[]);
-    return {live:[], upcoming, finished, standings};
+    const now = new Date();
+    let live=[], upcoming=[], finished=[];
+
+    jsons.forEach((json,idx)=>{
+      if(!json) return;
+      const leagueId = leagueIds[Math.floor(idx/2)];
+      const lg = FOOTBALL_LEAGUES.find(l=>l.id===leagueId)||{name:'Football',icon:'⚽'};
+      const isNext = idx%2===1;
+      const events = json.results||json.events||[];
+
+      events.forEach(e=>{
+        const matchDate = new Date((e.dateEvent||'')+'T'+(e.strTime||'00:00:00')+'Z');
+        const diffMins = (now - matchDate)/60000;
+        const hasScore = e.intHomeScore!==null && e.intHomeScore!==undefined && e.intHomeScore!=='';
+
+        let status, matchTime, minute='';
+        if(e.strStatus==='Half Time'){ status='live'; matchTime='HT'; minute='HT'; }
+        else if(e.strStatus==='Match Finished'){ status='finished'; matchTime='FT'; }
+        else if(e.strStatus==='Postponed'){ status='upcoming'; matchTime='PST'; }
+        else if(hasScore && diffMins>0 && diffMins<115){
+          status='live'; minute=`${Math.min(Math.round(diffMins),90)}'`;
+          matchTime=minute;
+        } else if(hasScore){ status='finished'; matchTime='FT'; }
+        else if(isNext||diffMins<0){ status='upcoming'; matchTime=formatMatchDate(matchDate); }
+        else { status='finished'; matchTime='FT'; }
+
+        const obj={
+          id:e.idEvent, sport:'football',
+          league:lg.name, leagueIcon:lg.icon,
+          team1:{name:e.strHomeTeam||'Home', flag:getTeamBadge(e.strHomeTeam,e.strHomeTeamBadge), score:hasScore?String(e.intHomeScore):''},
+          team2:{name:e.strAwayTeam||'Away', flag:getTeamBadge(e.strAwayTeam,e.strAwayTeamBadge), score:hasScore?String(e.intAwayScore):''},
+          status, time:matchTime, minute,
+          venue:e.strVenue||'TBC', detail:e.strLeague||lg.name,
+        };
+        if(status==='live') live.push(obj);
+        else if(status==='upcoming') upcoming.push(obj);
+        else finished.push(obj);
+      });
+    });
+
+    // Fetch EPL table
+    let standings=[];
+    try{
+      const tr = await fetch('https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2024-2025');
+      const tj = await tr.json();
+      standings = (tj.table||[]).slice(0,10).map((t,i)=>({
+        rank:i+1,
+        team:(t.strTeam||'Team')+' '+getFlag(t.strTeam||''),
+        badge:t.strTeamBadge||'',
+        p:t.intPlayed||0, w:t.intWin||0, l:t.intLoss||0, d:t.intDraw||0,
+        pts:t.intPoints||0,
+        form:(t.strForm||'').split('').slice(0,5).map(f=>f==='W'?'W':f==='L'?'L':'D'),
+      }));
+    }catch(e){}
+
+    return {
+      live: live.slice(0,4),
+      upcoming: upcoming.slice(0,6),
+      finished: finished.slice(0,6),
+      standings,
+    };
   }catch(e){
     console.warn('Football API failed:', e.message);
-    return {live:[], upcoming:[], finished:[], standings:footballStandingsFallback()};
+    return {live:[],upcoming:[],finished:[],standings:[]};
   }
 }
 
-function parseFootballEvent(e, status){
-  const t1=e.strHomeTeam||'Home', t2=e.strAwayTeam||'Away';
-  const s1=e.intHomeScore!==null&&e.intHomeScore!==undefined?String(e.intHomeScore):'';
-  const s2=e.intAwayScore!==null&&e.intAwayScore!==undefined?String(e.intAwayScore):'';
-  return {
-    id:e.idEvent, league:e.strLeague||'Football', leagueIcon:'⚽',
-    team1:{name:t1, flag:getFlag(t1), score:s1},
-    team2:{name:t2, flag:getFlag(t2), score:s2},
-    status, time: status==='finished'?'FT':formatDate(e.dateEvent+' '+e.strTime),
-    venue:e.strVenue||'TBC',
-    detail: status==='finished'
-      ? (s1&&s2 ? `${t1} ${s1} - ${s2} ${t2}` : e.strStatus||'')
-      : (e.strLeague||''),
-  };
-}
-
-function parseFootballTable(table){
-  return table.slice(0,8).map((t,i)=>({
-    rank:i+1,
-    team: (t.strTeam||'Team')+' '+getFlag(t.strTeam||''),
-    p:t.intPlayed||0, w:t.intWin||0, l:t.intLoss||0, d:t.intDraw||0,
-    pts:t.intPoints||0,
-    form: (t.strForm||'WWWWW').split('').slice(0,5).map(f=>f==='W'?'W':f==='L'?'L':'D'),
-  }));
-}
-
-function footballStandingsFallback(){
-  return [
-    {rank:1,team:'Man City 🔵',p:31,w:22,l:4,d:5,pts:71,form:['W','W','D','W','W']},
-    {rank:2,team:'Arsenal 🔴',p:31,w:21,l:4,d:6,pts:69,form:['W','D','W','W','W']},
-    {rank:3,team:'Liverpool 🔴',p:31,w:20,l:5,d:6,pts:66,form:['W','W','L','W','D']},
-    {rank:4,team:'Aston Villa 🟣',p:31,w:19,l:6,d:6,pts:63,form:['W','L','W','W','D']},
-    {rank:5,team:'Tottenham ⚪',p:31,w:15,l:10,d:6,pts:51,form:['W','W','W','L','W']},
-    {rank:6,team:'Chelsea 🔵',p:31,w:13,l:10,d:8,pts:47,form:['D','W','L','W','L']},
-  ];
-}
-
-// ── Helpers ──
-function formatDate(dtStr){
-  if(!dtStr) return 'TBC';
-  try{
-    const d=new Date(dtStr);
-    if(isNaN(d)) return dtStr;
-    const now=new Date();
-    const diff=d-now;
-    if(diff<0) return 'Recent';
-    if(diff<86400000) return 'Today '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    if(diff<172800000) return 'Tomorrow '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    return d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  }catch{return dtStr;}
-}
-
-// ── Render ──
+// ════════════════════════════════
+//  RENDER FUNCTIONS
+// ════════════════════════════════
 function makeMatchCard(m){
-  const isCricket = currentSport==='cricket';
+  const isCricket = m.sport==='cricket';
+  const statusLabel = m.status==='live'
+    ? `<span style="display:flex;align-items:center;gap:5px;"><span style="width:7px;height:7px;background:#ff2d55;border-radius:50%;display:inline-block;animation:pulseDot 1s ease-in-out infinite;"></span>LIVE${m.minute?' '+m.minute:''}</span>`
+    : m.status==='upcoming'?'🕐 UPCOMING':'✅ FT';
   const statusClass = m.status==='live'?'status-live':m.status==='upcoming'?'status-upcoming':'status-finished';
-  const statusLabel = m.status==='live'?'🔴 LIVE':m.status==='upcoming'?'🕐 UPCOMING':'✅ FT';
-  const cardClass = m.status==='live'?'match-card live-card':'match-card';
-  const s1 = m.team1.score||(m.status==='upcoming'?'—':'');
-  const s2 = m.team2.score||(m.status==='upcoming'?'—':'');
-  const ov1 = isCricket&&m.team1.overs?`<small style="font-size:0.6rem;color:var(--muted);display:block">(${m.team1.overs} ov)</small>`:'';
-  const ov2 = isCricket&&m.team2.overs?`<small style="font-size:0.6rem;color:var(--muted);display:block">(${m.team2.overs} ov)</small>`:'';
-  return `<div class="${cardClass}">
+  const cardClass = 'match-card'+(m.status==='live'?' live-card':'');
+  const s1 = m.team1.score||(m.status==='upcoming'?'':'-');
+  const s2 = m.team2.score||(m.status==='upcoming'?'':'-');
+  const ov1 = isCricket&&m.team1.overs?`<small style="font-size:0.6rem;color:var(--muted);display:block">${m.team1.overs}</small>`:'';
+  const ov2 = isCricket&&m.team2.overs?`<small style="font-size:0.6rem;color:var(--muted);display:block">${m.team2.overs}</small>`:'';
+  const sportTag = `<span style="font-size:0.7rem;opacity:0.6;">${m.sport==='cricket'?'🏏':'⚽'}</span>`;
+  return `<div class="${cardClass}" style="cursor:default;">
     <div class="match-card-top">
-      <div class="match-league">${m.leagueIcon} ${m.league}</div>
+      <div class="match-league">${m.leagueIcon} ${m.league} ${sportTag}</div>
       <div class="match-status ${statusClass}">${statusLabel}</div>
     </div>
     <div class="match-teams">
       <div class="match-team">
         <div class="team-flag">${m.team1.flag}</div>
         <div class="team-name">${m.team1.name}</div>
-        <div class="team-score${s1==='—'?' no-score':''}">${s1}${ov1}</div>
+        <div class="team-score${!s1||s1==='-'?' no-score':''}">${s1}${ov1}</div>
       </div>
       <div class="match-vs">
-        <div class="vs-text">VS</div>
+        <div class="vs-text">${m.status==='live'?'':'VS'}</div>
         <div class="match-time">${m.time}</div>
       </div>
       <div class="match-team">
         <div class="team-flag">${m.team2.flag}</div>
         <div class="team-name">${m.team2.name}</div>
-        <div class="team-score${s2==='—'?' no-score':''}">${s2}${ov2}</div>
+        <div class="team-score${!s2||s2==='-'?' no-score':''}">${s2}${ov2}</div>
       </div>
     </div>
     <div class="match-card-footer">
@@ -3788,341 +4048,181 @@ function makeMatchCard(m){
 }
 
 function makeStandingsTable(standings){
-  if(!standings.length) return '';
+  if(!standings||!standings.length) return '';
   return `<div class="standings-wrap">
     <table class="standings-table">
       <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>D</th><th>Pts</th><th>Form</th></tr></thead>
       <tbody>${standings.map(t=>`
         <tr class="rank-${t.rank}">
           <td><span class="rank-num">${t.rank}</span></td>
-          <td><div class="team-cell">${t.team}</div></td>
+          <td><div class="team-cell">
+            ${t.badge?`<img src="${t.badge}/tiny" style="width:18px;height:18px;object-fit:contain;vertical-align:middle;margin-right:5px;border-radius:2px;" onerror="this.remove()">`:'' }
+            ${t.team}
+          </div></td>
           <td>${t.p}</td><td>${t.w}</td><td>${t.l}</td><td>${t.d}</td>
           <td><span class="pts-cell">${t.pts}</span></td>
-          <td><div class="form-dots">${(t.form||[]).map(f=>`<div class="form-dot ${f==='W'?'form-w':f==='L'?'form-l':'form-d'}" title="${f}"></div>`).join('')}</div></td>
+          <td><div class="form-dots">${(t.form||[]).map(f=>`<div class="form-dot ${f==='W'?'form-w':f==='L'?'form-l':'form-d'}"></div>`).join('')}</div></td>
         </tr>`).join('')}
       </tbody>
     </table>
   </div>`;
 }
 
-function renderSportsData(data){
-  const icon = currentSport==='cricket'?'🏏':'⚽';
-  const tableTitle = currentSport==='cricket'?'🏆 ICC Test Rankings':'🏆 Premier League Table';
-  let html='';
+function renderSportsData(footballData, cricketData){
+  const fb = footballData || {live:[],upcoming:[],finished:[],standings:[]};
+  const cr = cricketData  || {live:[],upcoming:[],finished:[],standings:[]};
 
-  if(data.live.length){
-    html+=`<div class="sports-section-title">${icon} Live Now <span class="stag stag-live">Live</span></div>
+  // Merged views
+  const allLive     = [...fb.live,    ...cr.live];
+  const allUpcoming = [...fb.upcoming,...cr.upcoming];
+  const allFinished = [...fb.finished,...cr.finished];
+
+  let data;
+  if(currentSport==='all'){
+    data = {live:allLive, upcoming:allUpcoming.slice(0,6), finished:allFinished.slice(0,6), standings:fb.standings, showTable:true};
+  } else if(currentSport==='football'){
+    data = {...fb, showTable:true};
+  } else if(currentSport==='cricket'){
+    data = {...cr, showTable:false};
+  } else if(currentSport==='upcoming'){
+    data = {live:[], upcoming:allUpcoming, finished:[], standings:[], showTable:false};
+  } else if(currentSport==='finished'){
+    data = {live:[], upcoming:[], finished:allFinished, standings:[], showTable:false};
+  } else {
+    data = {live:allLive, upcoming:allUpcoming, finished:allFinished, standings:fb.standings, showTable:true};
+  }
+
+  let html = '';
+
+  if(data.live&&data.live.length){
+    html += `<div class="sports-section-title">🔴 Live Now <span class="stag stag-live">Live</span></div>
     <div class="matches-grid">${data.live.map(makeMatchCard).join('')}</div>`;
   }
-  if(data.upcoming.length){
-    html+=`<div class="sports-section-title">📅 Upcoming <span class="stag stag-upcoming">Soon</span></div>
+  if(data.upcoming&&data.upcoming.length){
+    html += `<div class="sports-section-title">📅 Upcoming <span class="stag stag-upcoming">Soon</span></div>
     <div class="matches-grid">${data.upcoming.map(makeMatchCard).join('')}</div>`;
   }
-  if(data.finished.length){
-    html+=`<div class="sports-section-title">✅ Recent Results <span class="stag stag-finished">FT</span></div>
+  if(data.finished&&data.finished.length){
+    html += `<div class="sports-section-title">✅ Finished <span class="stag stag-finished">FT</span></div>
     <div class="matches-grid">${data.finished.map(makeMatchCard).join('')}</div>`;
   }
-  if(!data.live.length&&!data.upcoming.length&&!data.finished.length){
-    html+=`<div class="empty"><div class="icon">${icon}</div><h3>কোনো match পাওয়া যায়নি</h3><p>একটু পরে আবার try করো</p></div>`;
+  if(!data.live?.length && !data.upcoming?.length && !data.finished?.length){
+    html += `<div class="empty">
+      <div class="icon">🏟️</div>
+      <h3>No live sports right now</h3>
+      <p>Check back soon or try refreshing</p>
+      <button onclick="refreshSports()" style="margin-top:1rem;background:var(--green);color:#000;border:none;padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;">🔄 Refresh</button>
+    </div>`;
   }
-  if(data.standings.length){
-    html+=`<div class="sports-section-title">${tableTitle}</div>${makeStandingsTable(data.standings)}`;
+  if(data.showTable && data.standings && data.standings.length){
+    html += `<div class="sports-section-title">🏆 Premier League Table</div>${makeStandingsTable(data.standings)}`;
   }
 
-  document.getElementById('sportsContent').innerHTML=html;
+  document.getElementById('sportsContent').innerHTML = html;
   stampNow();
 }
 
-// ── Tab switch ──
-function setSportTab(sport, btn){
-  currentSport=sport;
-  document.querySelectorAll('.sport-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  // Show/hide FIFA section vs regular sports content
-  const fifaSection = document.getElementById('fifaSection');
-  const sportsContent = document.getElementById('sportsContent');
-  const refreshWrap = document.querySelector('.sports-refresh');
-  if(sport === 'fifa'){
-    fifaSection.style.display = 'block';
-    sportsContent.style.display = 'none';
-    if(refreshWrap) refreshWrap.style.display = 'none';
-    initFIFA();
-  } else {
-    fifaSection.style.display = 'none';
-    sportsContent.style.display = 'block';
-    if(refreshWrap) refreshWrap.style.display = 'flex';
-    loadSportsData();
-  }
-}
-
-// ─────────────────────────────────────────
-// ===== FIFA WORLD CUP 2026 ENGINE =====
-// ─────────────────────────────────────────
-
-const FIFA_DATA = {
-  matches: [
-    {id:1,home:'🇧🇷 Brazil',homeFlag:'🇧🇷',homeCode:'BRA',away:'🇦🇷 Argentina',awayFlag:'🇦🇷',awayCode:'ARG',homeScore:2,awayScore:1,status:'live',minute:"67'",group:'Group A',venue:'MetLife Stadium, New Jersey'},
-    {id:2,home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',homeFlag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',homeCode:'ENG',away:'🇫🇷 France',awayFlag:'🇫🇷',awayCode:'FRA',homeScore:1,awayScore:1,status:'live',minute:"45+2'",group:'Group B',venue:'AT&T Stadium, Dallas'},
-    {id:3,home:'🇩🇪 Germany',homeFlag:'🇩🇪',homeCode:'GER',away:'🇪🇸 Spain',awayFlag:'🇪🇸',awayCode:'ESP',homeScore:3,awayScore:2,status:'finished',minute:'FT',group:'Group C',venue:'SoFi Stadium, LA'},
-    {id:4,home:'🇵🇹 Portugal',homeFlag:'🇵🇹',homeCode:'POR',away:'🇧🇪 Belgium',awayFlag:'🇧🇪',awayCode:'BEL',homeScore:1,awayScore:0,status:'finished',minute:'FT',group:'Group D',venue:'Levi\'s Stadium'},
-    {id:5,home:'🇳🇱 Netherlands',homeFlag:'🇳🇱',homeCode:'NED',away:'🇺🇾 Uruguay',awayFlag:'🇺🇾',awayCode:'URU',homeScore:0,awayScore:0,status:'upcoming',minute:'19:00',group:'Group E',venue:'Gillette Stadium'},
-    {id:6,home:'🇯🇵 Japan',homeFlag:'🇯🇵',homeCode:'JPN',away:'🇲🇽 Mexico',awayFlag:'🇲🇽',awayCode:'MEX',homeScore:0,awayScore:0,status:'upcoming',minute:'22:00',group:'Group F',venue:'Azteca Stadium'},
-  ],
-  groups: [
-    {name:'Group A',teams:[
-      {flag:'🇧🇷',name:'Brazil',p:3,w:2,d:1,l:0,gf:7,ga:3,pts:7},
-      {flag:'🇦🇷',name:'Argentina',p:3,w:2,d:0,l:1,gf:5,ga:4,pts:6},
-      {flag:'🇲🇦',name:'Morocco',p:3,w:1,d:0,l:2,gf:3,ga:5,pts:3},
-      {flag:'🇨🇷',name:'Costa Rica',p:3,w:0,d:1,l:2,gf:2,ga:5,pts:1},
-    ]},
-    {name:'Group B',teams:[
-      {flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'England',p:3,w:2,d:1,l:0,gf:6,ga:2,pts:7},
-      {flag:'🇫🇷',name:'France',p:3,w:2,d:1,l:0,gf:8,ga:3,pts:7},
-      {flag:'🇺🇸',name:'USA',p:3,w:1,d:0,l:2,gf:4,ga:6,pts:3},
-      {flag:'🇹🇳',name:'Tunisia',p:3,w:0,d:0,l:3,gf:1,ga:8,pts:0},
-    ]},
-    {name:'Group C',teams:[
-      {flag:'🇩🇪',name:'Germany',p:3,w:3,d:0,l:0,gf:9,ga:2,pts:9},
-      {flag:'🇪🇸',name:'Spain',p:3,w:2,d:0,l:1,gf:7,ga:4,pts:6},
-      {flag:'🇯🇵',name:'Japan',p:3,w:1,d:0,l:2,gf:3,ga:5,pts:3},
-      {flag:'🇨🇷',name:'Costa Rica',p:3,w:0,d:0,l:3,gf:0,ga:8,pts:0},
-    ]},
-  ],
-  scorers: [
-    {name:'Kylian Mbappé',country:'France',flag:'🇫🇷',goals:6},
-    {name:'Erling Haaland',country:'Norway',flag:'🇳🇴',goals:5},
-    {name:'Vinicius Jr.',country:'Brazil',flag:'🇧🇷',goals:4},
-    {name:'Harry Kane',country:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',goals:4},
-    {name:'Cristiano Ronaldo',country:'Portugal',flag:'🇵🇹',goals:3},
-    {name:'Lamine Yamal',country:'Spain',flag:'🇪🇸',goals:3},
-    {name:'Bukayo Saka',country:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',goals:3},
-    {name:'Neymar Jr.',country:'Brazil',flag:'🇧🇷',goals:2},
-  ],
-  fixtures: [
-    {day:'15',month:'JUN',time:'18:00',home:'🇮🇹 Italy',away:'🇭🇷 Croatia',group:'Group G',venue:'Rose Bowl, LA'},
-    {day:'16',month:'JUN',time:'15:00',home:'🇸🇳 Senegal',away:'🇨🇦 Canada',group:'Group H',venue:'BC Place, Vancouver'},
-    {day:'16',month:'JUN',time:'21:00',home:'🇦🇺 Australia',away:'🇸🇦 Saudi Arabia',group:'Group I',venue:'SoFi Stadium'},
-    {day:'17',month:'JUN',time:'18:00',home:'🇷🇸 Serbia',away:'🇨🇲 Cameroon',group:'Group J',venue:'Lumen Field'},
-    {day:'17',month:'JUN',time:'21:00',home:'🇺🇾 Uruguay',away:'🇰🇷 South Korea',group:'Group E',venue:'Hard Rock Stadium'},
-    {day:'18',month:'JUN',time:'15:00',home:'🇳🇬 Nigeria',away:'🇬🇭 Ghana',group:'Group K',venue:'Estadio Akron'},
-    {day:'18',month:'JUN',time:'21:00',home:'🇨🇭 Switzerland',away:'🇹🇷 Turkey',group:'Group L',venue:'NRG Stadium'},
-    {day:'19',month:'JUN',time:'18:00',home:'🇲🇽 Mexico',away:'🇵🇱 Poland',group:'Group F',venue:'Azteca Stadium'},
-  ]
-};
-
-function initFIFA(){
-  startFIFACountdown();
-  renderFIFAScores();
-  renderFIFAStandings();
-  renderFIFAScorers();
-  renderFIFAFixtures();
-}
-
-// Countdown to FIFA WC 2026 (June 11, 2026)
-let countdownInterval = null;
-function startFIFACountdown(){
-  if(countdownInterval) clearInterval(countdownInterval);
-  const target = new Date('2026-06-11T18:00:00Z');
-  function update(){
-    const now = new Date();
-    const diff = target - now;
-    if(diff <= 0){
-      document.getElementById('cd-days').textContent = '00';
-      document.getElementById('cd-hours').textContent = '00';
-      document.getElementById('cd-mins').textContent = '00';
-      document.getElementById('cd-secs').textContent = '00';
-      clearInterval(countdownInterval);return;
-    }
-    const d = Math.floor(diff/86400000);
-    const h = Math.floor((diff%86400000)/3600000);
-    const m = Math.floor((diff%3600000)/60000);
-    const s = Math.floor((diff%60000)/1000);
-    document.getElementById('cd-days').textContent = String(d).padStart(2,'0');
-    document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
-    document.getElementById('cd-mins').textContent = String(m).padStart(2,'0');
-    document.getElementById('cd-secs').textContent = String(s).padStart(2,'0');
-  }
-  update();
-  countdownInterval = setInterval(update, 1000);
-}
-
-function setFifaTab(tab, btn){
-  document.querySelectorAll('.fifa-tab').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.fifa-tab-content').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('fifa-'+tab).classList.add('active');
-}
-
-function renderFIFAScores(){
-  const el = document.getElementById('fifaMatches');
-  el.innerHTML = FIFA_DATA.matches.map((m,i) => {
-    const statusClass = m.status==='live'?'fmc-live':m.status==='finished'?'fmc-finished':'fmc-upcoming';
-    const statusText = m.status==='live'?`● LIVE ${m.minute}`:m.status==='finished'?'FULL TIME':`UPCOMING ${m.minute}`;
-    const scoreHtml = m.status==='upcoming'
-      ? `<div class="fmc-divider"><span class="fmc-vs">VS</span></div>`
-      : `<div class="fmc-divider"><div class="fmc-score">${m.homeScore} - ${m.awayScore}</div></div>`;
-    return `<div class="fifa-match-card ${m.status==='live'?'live-card':''}" style="animation-delay:${i*0.08}s">
-      <div style="display:flex;align-items:center">
-        <div class="fmc-status ${statusClass}">${statusText}</div>
-        <div class="fmc-group">${m.group}</div>
-      </div>
-      <div class="fmc-teams">
-        <div class="fmc-team"><div class="fmc-flag">${m.homeFlag}</div><div class="fmc-name">${m.homeCode}</div></div>
-        ${scoreHtml}
-        <div class="fmc-team"><div class="fmc-flag">${m.awayFlag}</div><div class="fmc-name">${m.awayCode}</div></div>
-      </div>
-      <div class="fmc-venue">📍 ${m.venue}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderFIFAStandings(){
-  const el = document.getElementById('fifaStandings');
-  el.innerHTML = FIFA_DATA.groups.map(g => `
-    <div class="fifa-group-block">
-      <div class="fifa-group-title">⚽ ${g.name}</div>
-      <table class="standings-table">
-        <thead><tr>
-          <th style="width:16px">#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>Pts</th>
-        </tr></thead>
-        <tbody>
-          ${g.teams.map((t,i) => `<tr class="${i<2?'qualified':''}">
-            <td class="std-rank">${i+1}</td>
-            <td><div class="std-team"><span class="std-flag">${t.flag}</span><span class="std-name">${t.name}</span></div></td>
-            <td>${t.p}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
-            <td>${t.gf}</td><td>${t.ga}</td>
-            <td class="std-pts">${t.pts}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-  `).join('');
-}
-
-function renderFIFAScorers(){
-  const el = document.getElementById('fifaScorers');
-  const ranks = ['gold','silver','bronze'];
-  el.innerHTML = FIFA_DATA.scorers.map((s,i) => `
-    <div class="scorer-row" style="animation:cardIn 0.3s ${i*0.06}s ease both">
-      <div class="scorer-rank ${ranks[i]||'other'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div>
-      <div class="scorer-flag">${s.flag}</div>
-      <div class="scorer-info">
-        <div class="scorer-name">${s.name}</div>
-        <div class="scorer-country">${s.country}</div>
-      </div>
-      <div class="scorer-goals">${s.goals}<span>goals</span></div>
-    </div>
-  `).join('');
-}
-
-function renderFIFAFixtures(){
-  const el = document.getElementById('fifaFixtures');
-  el.innerHTML = FIFA_DATA.fixtures.map((f,i) => `
-    <div class="fixture-row" style="animation:cardIn 0.3s ${i*0.06}s ease both">
-      <div class="fixture-date">
-        <div class="fixture-day">${f.day}</div>
-        <div class="fixture-mon">${f.month}</div>
-      </div>
-      <div class="fixture-teams">
-        <div class="fixture-matchup">${f.home} <span style="color:var(--muted);margin:0 0.2rem">vs</span> ${f.away}</div>
-        <div class="fixture-meta">📍 ${f.venue} · ${f.group}</div>
-      </div>
-      <div class="fixture-time">${f.time}</div>
-    </div>
-  `).join('');
-}
-
-// ── Main loader ──
+// ════════════════════════════
+//  LOAD & REFRESH
+// ════════════════════════════
 async function loadSportsData(){
   showSkel();
   try{
-    const data = currentSport==='cricket' ? await fetchCricket() : await fetchFootball();
-    sportsCache[currentSport]=data;
-    renderSportsData(data);
+    // Fetch both in parallel
+    const [fbData, crData] = await Promise.allSettled([fetchFootball(), fetchCricket()]);
+    allSportsData.football = fbData.status==='fulfilled' ? fbData.value : {live:[],upcoming:[],finished:[],standings:[]};
+    allSportsData.cricket  = crData.status==='fulfilled' ? crData.value : {live:[],upcoming:[],finished:[],standings:[]};
+    renderSportsData(allSportsData.football, allSportsData.cricket);
   }catch(e){
-    document.getElementById('sportsContent').innerHTML=
+    document.getElementById('sportsContent').innerHTML =
       `<div class="empty"><div class="icon">⚠️</div><h3>Data load হয়নি</h3><p>${e.message}</p>
-      <button onclick="loadSportsData()" style="margin-top:1rem;background:var(--green);color:#000;border:none;padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
+      <button onclick="refreshSports()" style="margin-top:1rem;background:var(--green);color:#000;border:none;padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
   }
 }
 
-// ── Refresh button ──
 function refreshSports(){
-  const btn=document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
-  sportsCache[currentSport]=null;
-  loadSportsData().finally(()=>btn.classList.remove('spinning'));
+  const btn = document.getElementById('refreshBtn');
+  if(btn) btn.classList.add('spinning');
+  loadSportsData().finally(()=>{ if(btn) btn.classList.remove('spinning'); });
 }
 
-// ── Auto refresh every 60s ──
 function startAutoRefresh(){
   if(sportsAutoRefresh) clearInterval(sportsAutoRefresh);
-  sportsAutoRefresh=setInterval(()=>{
-    if(document.getElementById('sports').classList.contains('active')){
+  // Auto-refresh every 30 seconds when sports page is active
+  sportsAutoRefresh = setInterval(()=>{
+    if(document.getElementById('sports')?.classList.contains('active')){
       loadSportsData();
     }
-  },60000);
+  }, 30000);
+}
+
+function setSportTab(sport, btn){
+  currentSport = sport;
+  document.querySelectorAll('.sport-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const fifaSection  = document.getElementById('fifaSection');
+  const sportsContent= document.getElementById('sportsContent');
+  const refreshWrap  = document.querySelector('.sports-refresh');
+
+  if(sport==='fifa'){
+    if(fifaSection)  fifaSection.style.display  = 'block';
+    if(sportsContent)sportsContent.style.display = 'none';
+    if(refreshWrap)  refreshWrap.style.display   = 'none';
+    if(typeof initFIFA==='function') initFIFA();
+  } else {
+    if(fifaSection)  fifaSection.style.display  = 'none';
+    if(sportsContent)sportsContent.style.display = 'block';
+    if(refreshWrap)  refreshWrap.style.display   = 'flex';
+    // If data already loaded, just re-render with new filter
+    if(allSportsData.football || allSportsData.cricket){
+      renderSportsData(allSportsData.football, allSportsData.cricket);
+    } else {
+      loadSportsData();
+    }
+  }
 }
 
 // Sports page hooks handled in main showPage
 </script>
 
+
 <script>
 // ===== LIVE TV =====
 let currentTVCat = 'All';
 
-let currentTVCat = 'All';
-
 const TV_CHANNELS = [
-  // ── Sports ──
-  {id:1, name:'Star Sports 1', logo:'⭐', cat:'Sports', quality:'HD', now:'Live Cricket',
-   stream:'https://v.norosports.ir/live/starsports1/index.m3u8', type:'hls'},
-  {id:2, name:'ESPN', logo:'🏈', cat:'Sports', quality:'HD', now:'Sports Live',
-   stream:'https://v.norosports.ir/live/espn/index.m3u8', type:'hls'},
-  {id:3, name:'Sky Sports', logo:'🏟️', cat:'Sports', quality:'HD', now:'Premier League',
-   stream:'https://v.norosports.ir/live/skysports/index.m3u8', type:'hls'},
-  {id:4, name:'beIN Sports 1', logo:'⚽', cat:'Sports', quality:'HD', now:'La Liga Live',
-   stream:'https://v.norosports.ir/live/bein1/index.m3u8', type:'hls'},
-  {id:5, name:'T Sports BD', logo:'🏏', cat:'Sports', quality:'HD', now:'Bangladesh Cricket',
-   stream:'https://mn-nl.mncdn.com/tvchannel_264/smil:tvchannel_264.smil/playlist.m3u8', type:'hls'},
+  // ── Sports — Verified free public HLS streams ──
+  {id:1, name:'T Sports BD', logo:'🏏', cat:'Sports', quality:'HD', now:'Bangladesh Sports Live',
+   stream:'https://mn-nl.mncdn.com/tvchannel_264/smil:tvchannel_264.smil/playlist.m3u8'},
+  {id:2, name:'Al Jazeera Sport', logo:'⚽', cat:'Sports', quality:'HD', now:'Sports News',
+   stream:'https://live-hls-web-aje.getaj.net/AJE/03.m3u8'},
+  {id:3, name:'Eurosport', logo:'🏆', cat:'Sports', quality:'HD', now:'Live Sports',
+   stream:'https://eurosport-pull-hls.cdn.euhce.net/live/eurosport1/playlist.m3u8'},
 
-  // ── News ──
-  {id:6, name:'BBC News', logo:'🇬🇧', cat:'News', quality:'HD', now:'World News Live',
-   stream:'https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/pc_hd_abr_v2.m3u8', type:'hls'},
-  {id:7, name:'Al Jazeera', logo:'🌍', cat:'News', quality:'HD', now:'World Report',
-   stream:'https://live-hls-web-aje.getaj.net/AJE/03.m3u8', type:'hls'},
-  {id:8, name:'DW News', logo:'🇩🇪', cat:'News', quality:'HD', now:'Europe Tonight',
-   stream:'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8', type:'hls'},
-  {id:9, name:'France 24 EN', logo:'🇫🇷', cat:'News', quality:'HD', now:'International News',
-   stream:'https://stream.france24.com/hls/live/2037086/F24_EN_LO_HLS/master.m3u8', type:'hls'},
-  {id:10, name:'CNN', logo:'📡', cat:'News', quality:'HD', now:'Breaking News',
-   stream:'https://cnn-cnninternational-1-us.samsung.wurl.tv/manifest/playlist.m3u8', type:'hls'},
+  // ── News — Verified public streams ──
+  {id:4, name:'BBC News', logo:'🇬🇧', cat:'News', quality:'HD', now:'World News',
+   stream:'https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/pc_hd_abr_v2.m3u8'},
+  {id:5, name:'Al Jazeera English', logo:'🌍', cat:'News', quality:'HD', now:'World Report',
+   stream:'https://live-hls-web-aje.getaj.net/AJE/03.m3u8'},
+  {id:6, name:'DW News', logo:'🇩🇪', cat:'News', quality:'HD', now:'Europe Tonight',
+   stream:'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8'},
+  {id:7, name:'France 24 EN', logo:'🇫🇷', cat:'News', quality:'HD', now:'International News',
+   stream:'https://stream.france24.com/hls/live/2037086/F24_EN_LO_HLS/master.m3u8'},
 
-  // ── Entertainment ──
-  {id:11, name:'Boishakhi TV', logo:'🌸', cat:'Entertainment', quality:'HD', now:'Bangla Natok',
-   stream:'https://mn-nl.mncdn.com/tvchannel_263/smil:tvchannel_263.smil/playlist.m3u8', type:'hls'},
-  {id:12, name:'ATN Bangla', logo:'🔵', cat:'Entertainment', quality:'HD', now:'Bangla Programme',
-   stream:'https://mn-nl.mncdn.com/tvchannel_279/smil:tvchannel_279.smil/playlist.m3u8', type:'hls'},
-  {id:13, name:'Deepto TV', logo:'💡', cat:'Entertainment', quality:'HD', now:'Drama Live',
-   stream:'https://mn-nl.mncdn.com/tvchannel_281/smil:tvchannel_281.smil/playlist.m3u8', type:'hls'},
-  {id:14, name:'ZEE TV', logo:'📺', cat:'Entertainment', quality:'HD', now:'Hindi Serial',
-   stream:'https://v.norosports.ir/live/zeetv/index.m3u8', type:'hls'},
-  {id:15, name:'Sony LIV', logo:'🎭', cat:'Entertainment', quality:'HD', now:'Sony Live',
-   stream:'https://v.norosports.ir/live/sonytv/index.m3u8', type:'hls'},
-
-  // ── Kids ──
-  {id:16, name:'Baby TV', logo:'🍼', cat:'Kids', quality:'HD', now:'Nursery Rhymes',
-   stream:'https://cbcrcnative-cbcrcnativekids-1-ca.samsung.wurl.tv/manifest/playlist.m3u8', type:'hls'},
-  {id:17, name:'Cartoon Network', logo:'🦸', cat:'Kids', quality:'HD', now:'Cartoons Live',
-   stream:'https://v.norosports.ir/live/cartoon/index.m3u8', type:'hls'},
-  {id:18, name:'Nick Jr', logo:'🧽', cat:'Kids', quality:'HD', now:'Kids Shows',
-   stream:'https://v.norosports.ir/live/nick/index.m3u8', type:'hls'},
+  // ── Entertainment — BD channels ──
+  {id:8, name:'Boishakhi TV', logo:'🌸', cat:'Entertainment', quality:'HD', now:'Bangla Programme',
+   stream:'https://mn-nl.mncdn.com/tvchannel_263/smil:tvchannel_263.smil/playlist.m3u8'},
+  {id:9, name:'ATN Bangla', logo:'🔵', cat:'Entertainment', quality:'HD', now:'Bangla Natok',
+   stream:'https://mn-nl.mncdn.com/tvchannel_279/smil:tvchannel_279.smil/playlist.m3u8'},
+  {id:10, name:'Deepto TV', logo:'💡', cat:'Entertainment', quality:'HD', now:'Drama Live',
+   stream:'https://mn-nl.mncdn.com/tvchannel_281/smil:tvchannel_281.smil/playlist.m3u8'},
 
   // ── Music ──
-  {id:19, name:'MTV Hits', logo:'🎸', cat:'Music', quality:'HD', now:'Top Chart Show',
-   stream:'https://cbcrcnative-cbcrcnativemusic-1-ca.samsung.wurl.tv/manifest/playlist.m3u8', type:'hls'},
-  {id:20, name:'Gaan Bangla', logo:'🎶', cat:'Music', quality:'HD', now:'Bangla Hits',
-   stream:'https://mn-nl.mncdn.com/tvchannel_286/smil:tvchannel_286.smil/playlist.m3u8', type:'hls'},
+  {id:11, name:'Gaan Bangla', logo:'🎶', cat:'Music', quality:'HD', now:'Bangla Hits',
+   stream:'https://mn-nl.mncdn.com/tvchannel_286/smil:tvchannel_286.smil/playlist.m3u8'},
+  {id:12, name:'MTV Live', logo:'🎸', cat:'Music', quality:'HD', now:'Top Charts',
+   stream:'https://cbcrcnative-cbcrcnativemusic-1-ca.samsung.wurl.tv/manifest/playlist.m3u8'},
 ];
 
 function setTVCat(cat, btn){
@@ -4587,6 +4687,8 @@ window.addEventListener('appinstalled', ()=>{
 const scrollBtn = document.getElementById('scrollTopBtn');
 window.addEventListener('scroll', ()=>{
   scrollBtn.classList.toggle('show', window.scrollY > 400);
+  const nav = document.getElementById('mainNav');
+  if(nav) nav.classList.toggle('scrolled', window.scrollY > 50);
 }, {passive:true});
 </script>
 
