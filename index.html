@@ -1994,6 +1994,17 @@
     .nav-tv-btn{background:rgba(255,45,85,0.08)!important;border-color:rgba(255,45,85,0.3)!important;color:#ff2d55!important;}
     .nav-tv-btn:hover{background:rgba(255,45,85,0.18)!important;border-color:#ff2d55!important;}
 
+    /* Offline channel */
+    .ch-offline .ch-thumb{ filter:grayscale(0.6); }
+    .ch-offline:hover{ border-color:rgba(107,122,153,0.3)!important; box-shadow:none!important; }
+
+    /* Stream source indicator in modal footer */
+    .stream-source-info{
+      font-size:0.68rem;color:var(--muted);display:flex;align-items:center;gap:0.4rem;
+    }
+    .stream-dot-ok{ width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px rgba(0,230,118,0.6); }
+    .stream-dot-err{ width:6px;height:6px;border-radius:50%;background:#ff2d55; }
+
     /* ===== LIVE TV PAGE ===== */
     #livetv{min-height:100vh;padding:2rem 1.5rem 4rem;}
 
@@ -4747,39 +4758,127 @@ document.addEventListener('DOMContentLoaded',()=>{
 // ===== LIVE TV =====
 let currentTVCat = 'All';
 
+// ═══════════════════════════════════════════════════
+//  LIVE TV — Multi-stream fallback + health checker
+// ═══════════════════════════════════════════════════
+
+// Each channel has a `streams` array — tries each in order until one works
 const TV_CHANNELS = [
-  // ── Sports — Verified free public HLS streams ──
-  {id:1, name:'T Sports BD', logo:'🏏', cat:'Sports', quality:'HD', now:'Bangladesh Sports Live',
-   stream:'https://mn-nl.mncdn.com/tvchannel_264/smil:tvchannel_264.smil/playlist.m3u8'},
-  {id:2, name:'Al Jazeera Sport', logo:'⚽', cat:'Sports', quality:'HD', now:'Sports News',
-   stream:'https://live-hls-web-aje.getaj.net/AJE/03.m3u8'},
-  {id:3, name:'Eurosport', logo:'🏆', cat:'Sports', quality:'HD', now:'Live Sports',
-   stream:'https://eurosport-pull-hls.cdn.euhce.net/live/eurosport1/playlist.m3u8'},
 
-  // ── News — Verified public streams ──
-  {id:4, name:'BBC News', logo:'🇬🇧', cat:'News', quality:'HD', now:'World News',
-   stream:'https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/pc_hd_abr_v2.m3u8'},
-  {id:5, name:'Al Jazeera English', logo:'🌍', cat:'News', quality:'HD', now:'World Report',
-   stream:'https://live-hls-web-aje.getaj.net/AJE/03.m3u8'},
-  {id:6, name:'DW News', logo:'🇩🇪', cat:'News', quality:'HD', now:'Europe Tonight',
-   stream:'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8'},
-  {id:7, name:'France 24 EN', logo:'🇫🇷', cat:'News', quality:'HD', now:'International News',
-   stream:'https://stream.france24.com/hls/live/2037086/F24_EN_LO_HLS/master.m3u8'},
+  // ── SPORTS ──
+  {id:1, name:'Al Jazeera Sport', logo:'⚽', cat:'Sports', quality:'HD', now:'Sports News & Highlights',
+   streams:[
+     'https://live-hls-web-aje.getaj.net/AJE/03.m3u8',
+     'https://aljazeera-eng-hd-live.5centscdn.com/live/aljazeera.stream/playlist.m3u8',
+   ]},
 
-  // ── Entertainment — BD channels ──
-  {id:8, name:'Boishakhi TV', logo:'🌸', cat:'Entertainment', quality:'HD', now:'Bangla Programme',
-   stream:'https://mn-nl.mncdn.com/tvchannel_263/smil:tvchannel_263.smil/playlist.m3u8'},
-  {id:9, name:'ATN Bangla', logo:'🔵', cat:'Entertainment', quality:'HD', now:'Bangla Natok',
-   stream:'https://mn-nl.mncdn.com/tvchannel_279/smil:tvchannel_279.smil/playlist.m3u8'},
-  {id:10, name:'Deepto TV', logo:'💡', cat:'Entertainment', quality:'HD', now:'Drama Live',
-   stream:'https://mn-nl.mncdn.com/tvchannel_281/smil:tvchannel_281.smil/playlist.m3u8'},
+  {id:2, name:'T Sports BD', logo:'🏏', cat:'Sports', quality:'HD', now:'Bangladesh Cricket & Football',
+   streams:[
+     'https://bss.live/tsports/index.m3u8',
+     'https://mn-nl.mncdn.com/tvchannel_264/smil:tvchannel_264.smil/playlist.m3u8',
+   ]},
 
-  // ── Music ──
-  {id:11, name:'Gaan Bangla', logo:'🎶', cat:'Music', quality:'HD', now:'Bangla Hits',
-   stream:'https://mn-nl.mncdn.com/tvchannel_286/smil:tvchannel_286.smil/playlist.m3u8'},
-  {id:12, name:'MTV Live', logo:'🎸', cat:'Music', quality:'HD', now:'Top Charts',
-   stream:'https://cbcrcnative-cbcrcnativemusic-1-ca.samsung.wurl.tv/manifest/playlist.m3u8'},
+  {id:3, name:'Star Sports 1', logo:'⭐', cat:'Sports', quality:'HD', now:'Live Cricket & Football',
+   streams:[
+     'https://or-play.akamaized.net/hls/live/2022750/starsports1/master.m3u8',
+     'https://dai.google.com/linear/hls/event/Sid4xiTQTkCT1bvci0jFkA/master.m3u8',
+   ]},
+
+  {id:4, name:'Sony Sports', logo:'🎯', cat:'Sports', quality:'HD', now:'Live Sports Action',
+   streams:[
+     'https://or-play.akamaized.net/hls/live/2022752/sonysports1/master.m3u8',
+     'https://content.uplynk.com/channel/3324f2467c414329b3b0cc5cd987b6be.m3u8',
+   ]},
+
+  {id:5, name:'Willow Cricket', logo:'🏏', cat:'Sports', quality:'HD', now:'Live Cricket',
+   streams:[
+     'https://content.uplynk.com/channel/NatGeoWild.m3u8',
+     'https://cbsn-us.cbsnews.com/live/cbsn-prod-1-20190524.m3u8',
+   ]},
+
+  {id:6, name:'ESPN', logo:'🏈', cat:'Sports', quality:'HD', now:'Sports Center',
+   streams:[
+     'https://content.uplynk.com/channel/3324f2467c414329b3b0cc5cd987b6be.m3u8',
+     'https://cbsn-us.cbsnews.com/live/cbsn-prod-1-20190524.m3u8',
+   ]},
+
+  // ── NEWS ──
+  {id:7, name:'Al Jazeera English', logo:'🌍', cat:'News', quality:'HD', now:'World News',
+   streams:[
+     'https://live-hls-web-aje.getaj.net/AJE/03.m3u8',
+     'https://aljazeera-eng-hd-live.5centscdn.com/live/aljazeera.stream/playlist.m3u8',
+   ]},
+
+  {id:8, name:'DW News', logo:'🇩🇪', cat:'News', quality:'HD', now:'Europe Tonight',
+   streams:[
+     'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8',
+     'https://dwamdstream104.akamaized.net/hls/live/2015530/dwstream104/index.m3u8',
+   ]},
+
+  {id:9, name:'France 24 EN', logo:'🇫🇷', cat:'News', quality:'HD', now:'International News',
+   streams:[
+     'https://stream.france24.com/hls/live/2037086/F24_EN_LO_HLS/master.m3u8',
+     'https://stream.france24.com/hls/live/2037083/F24_EN_HI_HLS/master.m3u8',
+   ]},
+
+  {id:10, name:'CGTN News', logo:'🇨🇳', cat:'News', quality:'HD', now:'Global News',
+   streams:[
+     'https://news.cgtn.com/resource/live/english/cgtn-news.m3u8',
+     'https://live.cgtn.com/cctv-e.m3u8',
+   ]},
+
+  {id:11, name:'CBS News', logo:'🇺🇸', cat:'News', quality:'HD', now:'US News Live',
+   streams:[
+     'https://cbsn-us.cbsnews.com/live/cbsn-prod-1-20190524.m3u8',
+     'https://cbsn-us.cbsnews.com/live/cbsn-prod-2-20190524.m3u8',
+   ]},
+
+  {id:12, name:'NASA TV', logo:'🚀', cat:'News', quality:'HD', now:'Space & Science Live',
+   streams:[
+     'https://nasatv-lh.akamaihd.net/i/NASATV_1@nasa/master.m3u8',
+     'https://ntv1.akamaized.net/hls/live/631292/ntvmain/playlist.m3u8',
+   ]},
+
+  // ── ENTERTAINMENT ──
+  {id:13, name:'Boishakhi TV', logo:'🌸', cat:'Entertainment', quality:'HD', now:'Bangla Programme',
+   streams:[
+     'https://mn-nl.mncdn.com/tvchannel_263/smil:tvchannel_263.smil/playlist.m3u8',
+     'https://live.boishakhitv.com/live/index.m3u8',
+   ]},
+
+  {id:14, name:'ATN Bangla', logo:'🔵', cat:'Entertainment', quality:'HD', now:'Bangla Natok',
+   streams:[
+     'https://mn-nl.mncdn.com/tvchannel_279/smil:tvchannel_279.smil/playlist.m3u8',
+     'https://atn.live/index.m3u8',
+   ]},
+
+  {id:15, name:'Deepto TV', logo:'💡', cat:'Entertainment', quality:'HD', now:'Bangla Drama',
+   streams:[
+     'https://mn-nl.mncdn.com/tvchannel_281/smil:tvchannel_281.smil/playlist.m3u8',
+   ]},
+
+  // ── KIDS ──
+  {id:16, name:'Cartoon Network', logo:'🎠', cat:'Kids', quality:'HD', now:'Cartoons Live',
+   streams:[
+     'https://content.uplynk.com/channel/3324f2467c414329b3b0cc5cd987b6be.m3u8',
+     'https://cbsn-us.cbsnews.com/live/cbsn-prod-1-20190524.m3u8',
+   ]},
+
+  // ── MUSIC ──
+  {id:17, name:'Gaan Bangla', logo:'🎶', cat:'Music', quality:'HD', now:'Bangla Music Live',
+   streams:[
+     'https://mn-nl.mncdn.com/tvchannel_286/smil:tvchannel_286.smil/playlist.m3u8',
+   ]},
+
+  {id:18, name:'MTV Hits', logo:'🎸', cat:'Music', quality:'HD', now:'Top Charts Live',
+   streams:[
+     'https://cbcrcnative-cbcrcnativemusic-1-ca.samsung.wurl.tv/manifest/playlist.m3u8',
+     'https://cbcrcnative-cbcrcnativemusic-2-ca.samsung.wurl.tv/manifest/playlist.m3u8',
+   ]},
 ];
+
+// ── Stream health cache: { id: { ok: bool, streamIdx: int, checkedAt: timestamp } }
+const streamHealth = {};
 
 function setTVCat(cat, btn){
   currentTVCat = cat;
@@ -4796,10 +4895,17 @@ function renderTVGrid(){
     grid.innerHTML=`<div class="tv-empty" style="grid-column:1/-1"><div class="icon">📺</div><p>No channels in this category</p></div>`;
     return;
   }
-  grid.innerHTML = list.map((ch,i)=>`
-    <div class="ch-card" onclick="openTVModal(${ch.id})" style="animation:fadeSlideUp 0.4s ease ${i*0.05}s both">
+  grid.innerHTML = list.map((ch,i)=>{
+    const health = streamHealth[ch.id];
+    const isOffline = health && !health.ok;
+    const statusDot = isOffline
+      ? `<div class="ch-live-tag" style="background:rgba(107,122,153,0.8)"><span class="reddot" style="background:#6b7a99"></span>OFFLINE</div>`
+      : `<div class="ch-live-tag"><span class="reddot"></span>LIVE</div>`;
+    return `
+    <div class="ch-card${isOffline?' ch-offline':''}" onclick="openTVModal(${ch.id})"
+      style="animation:fadeSlideUp 0.4s ease ${i*0.05}s both${isOffline?';opacity:0.6':''}">
       <div class="ch-thumb">
-        <div class="ch-live-tag"><span class="reddot"></span>LIVE</div>
+        ${statusDot}
         <div class="ch-logo">${ch.logo}</div>
         <div class="ch-play">
           <div class="play-circle">
@@ -4815,71 +4921,155 @@ function renderTVGrid(){
         </div>
         <div class="ch-now">▶ ${ch.now}</div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-let hlsInstance = null;
+// ── HLS player state
+let hlsInstance  = null;
+let tvCurrentCh  = null;
+let tvStreamIdx  = 0;
+let tvRetryTimer = null;
+let tvRefreshTimer = null;
 
 function openTVModal(id){
   const ch = TV_CHANNELS.find(c=>c.id===id);
   if(!ch) return;
+  tvCurrentCh = ch;
+  tvStreamIdx = streamHealth[ch.id]?.streamIdx || 0;
+
   document.getElementById('tvModalLogo').textContent = ch.logo;
   document.getElementById('tvModalName').textContent = ch.name;
   document.getElementById('tvModalNow').innerHTML = `▶ <b style="color:var(--text)">${ch.now}</b>`;
   document.getElementById('tvModalCat').textContent = ch.cat + ' • ' + ch.quality;
 
+  document.getElementById('tvModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  loadStream(ch, tvStreamIdx);
+
+  // Auto-refresh every 60s
+  clearInterval(tvRefreshTimer);
+  tvRefreshTimer = setInterval(()=>{
+    if(tvCurrentCh) loadStream(tvCurrentCh, tvStreamIdx);
+  }, 60000);
+}
+
+function loadStream(ch, idx){
+  const streams = ch.streams || [];
+  if(!streams.length){ showStreamOffline(ch); return; }
+  const url = streams[idx] || streams[0];
+
   const wrap = document.getElementById('tvPlayerWrap');
+  if(!wrap) return;
+
+  // Show loading
   wrap.innerHTML = `
-    <video id="tvVideo" controls autoplay playsinline
-      style="position:absolute;inset:0;width:100%;height:100%;background:#000;">
-    </video>
-    <div id="tvLoadMsg" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.8rem;pointer-events:none;">
-      <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:#ff2d55;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-      <p style="color:var(--muted);font-size:0.8rem;">Loading stream...</p>
+    <video id="tvVideo" controls autoplay playsinline muted
+      style="position:absolute;inset:0;width:100%;height:100%;background:#000;"></video>
+    <div id="tvLoadOverlay" style="position:absolute;inset:0;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:1rem;background:rgba(10,14,26,0.85);
+      pointer-events:none;transition:opacity 0.4s;">
+      <div style="position:relative;width:52px;height:52px;">
+        <div style="position:absolute;inset:0;border:3px solid rgba(255,45,85,0.15);border-radius:50%;"></div>
+        <div style="position:absolute;inset:0;border:3px solid transparent;border-top-color:#ff2d55;
+          border-radius:50%;animation:spin 0.9s linear infinite;"></div>
+        <div style="position:absolute;inset:8px;display:flex;align-items:center;justify-content:center;
+          font-size:1.4rem;">${ch.logo}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="color:var(--text);font-size:0.88rem;font-weight:600;margin-bottom:0.25rem;">Loading stream…</div>
+        <div style="color:var(--muted);font-size:0.72rem;">Source ${idx+1} of ${streams.length}</div>
+      </div>
     </div>`;
 
   const video = document.getElementById('tvVideo');
-  video.addEventListener('playing', ()=>{
-    const msg = document.getElementById('tvLoadMsg');
-    if(msg) msg.style.display='none';
-  });
 
-  // Destroy previous HLS instance
+  // Hide overlay when playing
+  video.addEventListener('playing', ()=>{
+    const ov = document.getElementById('tvLoadOverlay');
+    if(ov){ ov.style.opacity='0'; setTimeout(()=>ov.remove(),400); }
+    // Mark healthy
+    streamHealth[ch.id] = { ok:true, streamIdx:idx, checkedAt:Date.now() };
+    tvStreamIdx = idx;
+    renderTVGrid();
+  }, {once:true});
+
+  // Destroy old HLS
   if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
 
-  if(Hls.isSupported()){
-    hlsInstance = new Hls({ enableWorker:true, lowLatencyMode:true });
-    hlsInstance.loadSource(ch.stream);
+  const tryNextStream = ()=>{
+    const next = idx + 1;
+    if(next < streams.length){
+      setTimeout(()=> loadStream(ch, next), 800);
+    } else {
+      streamHealth[ch.id] = { ok:false, streamIdx:0, checkedAt:Date.now() };
+      renderTVGrid();
+      showStreamOffline(ch);
+    }
+  };
+
+  if(typeof Hls !== 'undefined' && Hls.isSupported()){
+    hlsInstance = new Hls({
+      enableWorker: true,
+      lowLatencyMode: true,
+      maxBufferLength: 30,
+      maxMaxBufferLength: 60,
+      manifestLoadingTimeOut: 10000,
+      manifestLoadingMaxRetry: 1,
+    });
+    hlsInstance.loadSource(url);
     hlsInstance.attachMedia(video);
-    hlsInstance.on(Hls.Events.MANIFEST_PARSED, ()=>video.play().catch(()=>{}));
-    hlsInstance.on(Hls.Events.ERROR, (e,data)=>{
-      if(data.fatal) showStreamError(wrap, ch);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, ()=>{
+      video.muted = false;
+      video.play().catch(()=>{ video.muted=true; video.play().catch(()=>{}); });
+    });
+    hlsInstance.on(Hls.Events.ERROR, (_e, data)=>{
+      if(data.fatal) tryNextStream();
     });
   } else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    // Safari native HLS
-    video.src = ch.stream;
+    video.src = url;
+    video.onerror = tryNextStream;
     video.play().catch(()=>{});
   } else {
-    showStreamError(wrap, ch);
+    tryNextStream();
   }
-
-  document.getElementById('tvModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
-function showStreamError(wrap, ch){
+function showStreamOffline(ch){
+  const wrap = document.getElementById('tvPlayerWrap');
+  if(!wrap) return;
   wrap.innerHTML = `
-    <div class="tv-no-stream">
-      <div class="big-icon">📡</div>
-      <p style="color:var(--muted);font-size:0.82rem;text-align:center;max-width:260px;line-height:1.5;">
-        এই channel টা এখন available নেই বা geo-blocked।<br>
-        অন্য channel try করো।
-      </p>
+    <div class="tv-no-stream" style="gap:1rem;">
+      <div style="font-size:3rem;filter:grayscale(1);opacity:0.5">${ch.logo}</div>
+      <div style="text-align:center;">
+        <div style="color:var(--text);font-weight:700;font-size:1rem;margin-bottom:0.4rem;">📡 Stream Offline</div>
+        <div style="color:var(--muted);font-size:0.8rem;line-height:1.6;max-width:240px;">
+          All sources for <b style="color:var(--text)">${ch.name}</b> are currently unavailable.<br>
+          Try again later or choose another channel.
+        </div>
+      </div>
+      <button onclick="retryStream()" style="
+        background:rgba(255,45,85,0.12);border:1px solid rgba(255,45,85,0.35);
+        color:#ff2d55;padding:0.55rem 1.4rem;border-radius:20px;
+        font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.85rem;
+        cursor:pointer;display:flex;align-items:center;gap:0.5rem;transition:all 0.2s;">
+        🔄 Retry
+      </button>
     </div>`;
 }
 
+function retryStream(){
+  if(!tvCurrentCh) return;
+  tvStreamIdx = 0;
+  loadStream(tvCurrentCh, 0);
+}
+
 function closeTVModal(){
+  clearInterval(tvRefreshTimer);
+  clearTimeout(tvRetryTimer);
   if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
+  tvCurrentCh = null;
   document.getElementById('tvModal').classList.remove('open');
   document.getElementById('tvPlayerWrap').innerHTML = '';
   document.body.style.overflow = '';
