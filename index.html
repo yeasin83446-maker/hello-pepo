@@ -3021,4 +3021,1276 @@ const FLAG_MAP = {
 };
 function getFlag(name){
   const k=(name||'').toLowerCase();
-  for(con
+  for(const [team,flag] of Object.entries(FLAG_MAP)){
+    if(k.includes(team)) return flag;
+  }
+  return '🏟️';
+}
+
+// ── Skeleton loader ──
+function showSkel(){
+  document.getElementById('sportsContent').innerHTML=
+    `<div class="matches-grid">${[1,2,3,4].map(()=>'<div class="skel"></div>').join('')}</div>`;
+}
+
+// ── Timestamp ──
+function stampNow(){
+  document.getElementById('lastUpdated').textContent=
+    'Updated: '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ════════════════════════════
+//  CRICKET — cricapi.com free
+// ════════════════════════════
+async function fetchCricket(){
+  // cricapi free endpoint — no key required for /matches
+  const BASE = 'https://cricbuzz-cricket.p.rapidapi.com';
+  // Fallback: use allsportdb / open cricket API
+  // Primary: cricapi.com/api/cricketScore (free, 100/day)
+  // We use cricapi's open endpoint
+  try {
+    const res = await fetch('https://api.cricapi.com/v1/currentMatches?apikey=a52ea237-4f9a-4a64-862a-152f3f3ba3d8&offset=0');
+    if(!res.ok) throw new Error('cricapi error');
+    const json = await res.json();
+    if(json.status !== 'success') throw new Error('cricapi bad status');
+    return parseCricketAPI(json.data || []);
+  } catch(e){
+    console.warn('Cricket API failed, using fallback:', e.message);
+    return fetchCricketFallback();
+  }
+}
+
+function parseCricketAPI(matches){
+  const live=[], upcoming=[], finished=[];
+  matches.slice(0,12).forEach(m=>{
+    const t1 = m.teams?.[0] || m.t1 || 'Team A';
+    const t2 = m.teams?.[1] || m.t2 || 'Team B';
+    const score1 = m.score?.[0] ? `${m.score[0].r}/${m.score[0].w}` : '';
+    const overs1 = m.score?.[0]?.o ? `${m.score[0].o}` : '';
+    const score2 = m.score?.[1] ? `${m.score[1].r}/${m.score[1].w}` : '';
+    const overs2 = m.score?.[1]?.o ? `${m.score[1].o}` : '';
+    const isLive = m.matchStarted && !m.matchEnded;
+    const isDone = m.matchEnded;
+    const status = isLive ? 'live' : isDone ? 'finished' : 'upcoming';
+    const obj = {
+      id: m.id,
+      league: m.series_id ? (m.name||'Cricket').split(',')[0] : (m.name||'Cricket'),
+      leagueIcon:'🏏',
+      team1:{name:t1, flag:getFlag(t1), score:score1, overs:overs1},
+      team2:{name:t2, flag:getFlag(t2), score:score2, overs:overs2},
+      status,
+      time: isLive ? (m.status||'Live') : isDone ? 'Finished' : formatDate(m.dateTimeGMT),
+      venue: m.venue || 'TBC',
+      detail: m.status || (isDone ? (m.score?.[0] ? 'Match ended':'—') : 'Upcoming'),
+    };
+    if(status==='live') live.push(obj);
+    else if(status==='finished') finished.push(obj);
+    else upcoming.push(obj);
+  });
+  return {live, upcoming: upcoming.slice(0,4), finished: finished.slice(0,3), standings: cricketStandings()};
+}
+
+async function fetchCricketFallback(){
+  // TheSportsDB cricket — free no key
+  try{
+    const res = await fetch('https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4484&s=2024-2025');
+    const json = await res.json();
+    const events = (json.events||[]).slice(0,10);
+    const live=[],upcoming=[],finished=[];
+    events.forEach((e,i)=>{
+      const t1=e.strHomeTeam||'Team A', t2=e.strAwayTeam||'Team B';
+      const done = e.strStatus==='Match Finished'||e.intHomeScore!==null;
+      const status = done?'finished':'upcoming';
+      const obj={
+        id:e.idEvent, league:e.strLeague||'Cricket', leagueIcon:'🏏',
+        team1:{name:t1,flag:getFlag(t1),score:e.intHomeScore!==null?String(e.intHomeScore):'',overs:''},
+        team2:{name:t2,flag:getFlag(t2),score:e.intAwayScore!==null?String(e.intAwayScore):'',overs:''},
+        status, time:done?'FT':formatDate(e.dateEvent+' '+e.strTime),
+        venue:e.strVenue||'TBC', detail:e.strStatus||''
+      };
+      if(status==='finished') finished.push(obj); else upcoming.push(obj);
+    });
+    return {live, upcoming:upcoming.slice(0,4), finished:finished.slice(0,3), standings:cricketStandings()};
+  }catch(e2){
+    return {live:[], upcoming:[], finished:[], standings:cricketStandings()};
+  }
+}
+
+function cricketStandings(){
+  return [
+    {rank:1,team:'India 🇮🇳',p:8,w:6,l:1,d:1,pts:74,form:['W','W','W','D','W']},
+    {rank:2,team:'Australia 🇦🇺',p:8,w:5,l:2,d:1,pts:62,form:['W','L','W','W','D']},
+    {rank:3,team:'England 🏴󠁧󠁢󠁥󠁮󠁧󠁿',p:8,w:4,l:3,d:1,pts:50,form:['W','L','W','L','W']},
+    {rank:4,team:'South Africa 🇿🇦',p:7,w:4,l:2,d:1,pts:52,form:['W','W','D','L','W']},
+    {rank:5,team:'Bangladesh 🇧🇩',p:6,w:2,l:3,d:1,pts:27,form:['L','W','L','D','L']},
+    {rank:6,team:'New Zealand 🇳🇿',p:7,w:3,l:4,d:0,pts:35,form:['L','W','L','W','L']},
+  ];
+}
+
+// ════════════════════════════
+//  FOOTBALL — TheSportsDB free
+// ════════════════════════════
+async function fetchFootball(){
+  try{
+    // Fetch live + recent EPL events — TheSportsDB free API
+    const [liveRes, nextRes, prevRes, tableRes] = await Promise.all([
+      fetch('https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604'), // EPL last events
+      fetch('https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133604'), // EPL next events
+      fetch('https://www.thesportsdb.com/api/v1/json/3/eventslast.php?id=133604'),
+      fetch('https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2024-2025'), // EPL table
+    ]);
+    const [liveJson, nextJson, prevJson, tableJson] = await Promise.all([
+      liveRes.json(), nextRes.json(), prevRes.json(), tableRes.json()
+    ]);
+
+    const finished = (liveJson.results||[]).slice(0,3).map(e=>parseFootballEvent(e,'finished'));
+    const upcoming = (nextJson.events||[]).slice(0,4).map(e=>parseFootballEvent(e,'upcoming'));
+    const standings = parseFootballTable(tableJson.table||[]);
+    return {live:[], upcoming, finished, standings};
+  }catch(e){
+    console.warn('Football API failed:', e.message);
+    return {live:[], upcoming:[], finished:[], standings:footballStandingsFallback()};
+  }
+}
+
+function parseFootballEvent(e, status){
+  const t1=e.strHomeTeam||'Home', t2=e.strAwayTeam||'Away';
+  const s1=e.intHomeScore!==null&&e.intHomeScore!==undefined?String(e.intHomeScore):'';
+  const s2=e.intAwayScore!==null&&e.intAwayScore!==undefined?String(e.intAwayScore):'';
+  return {
+    id:e.idEvent, league:e.strLeague||'Football', leagueIcon:'⚽',
+    team1:{name:t1, flag:getFlag(t1), score:s1},
+    team2:{name:t2, flag:getFlag(t2), score:s2},
+    status, time: status==='finished'?'FT':formatDate(e.dateEvent+' '+e.strTime),
+    venue:e.strVenue||'TBC',
+    detail: status==='finished'
+      ? (s1&&s2 ? `${t1} ${s1} - ${s2} ${t2}` : e.strStatus||'')
+      : (e.strLeague||''),
+  };
+}
+
+function parseFootballTable(table){
+  return table.slice(0,8).map((t,i)=>({
+    rank:i+1,
+    team: (t.strTeam||'Team')+' '+getFlag(t.strTeam||''),
+    p:t.intPlayed||0, w:t.intWin||0, l:t.intLoss||0, d:t.intDraw||0,
+    pts:t.intPoints||0,
+    form: (t.strForm||'WWWWW').split('').slice(0,5).map(f=>f==='W'?'W':f==='L'?'L':'D'),
+  }));
+}
+
+function footballStandingsFallback(){
+  return [
+    {rank:1,team:'Man City 🔵',p:31,w:22,l:4,d:5,pts:71,form:['W','W','D','W','W']},
+    {rank:2,team:'Arsenal 🔴',p:31,w:21,l:4,d:6,pts:69,form:['W','D','W','W','W']},
+    {rank:3,team:'Liverpool 🔴',p:31,w:20,l:5,d:6,pts:66,form:['W','W','L','W','D']},
+    {rank:4,team:'Aston Villa 🟣',p:31,w:19,l:6,d:6,pts:63,form:['W','L','W','W','D']},
+    {rank:5,team:'Tottenham ⚪',p:31,w:15,l:10,d:6,pts:51,form:['W','W','W','L','W']},
+    {rank:6,team:'Chelsea 🔵',p:31,w:13,l:10,d:8,pts:47,form:['D','W','L','W','L']},
+  ];
+}
+
+// ── Helpers ──
+function formatDate(dtStr){
+  if(!dtStr) return 'TBC';
+  try{
+    const d=new Date(dtStr);
+    if(isNaN(d)) return dtStr;
+    const now=new Date();
+    const diff=d-now;
+    if(diff<0) return 'Recent';
+    if(diff<86400000) return 'Today '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    if(diff<172800000) return 'Tomorrow '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  }catch{return dtStr;}
+}
+
+// ── Render ──
+function makeMatchCard(m){
+  const isCricket = currentSport==='cricket';
+  const statusClass = m.status==='live'?'status-live':m.status==='upcoming'?'status-upcoming':'status-finished';
+  const statusLabel = m.status==='live'?'🔴 LIVE':m.status==='upcoming'?'🕐 UPCOMING':'✅ FT';
+  const cardClass = m.status==='live'?'match-card live-card':'match-card';
+  const s1 = m.team1.score||(m.status==='upcoming'?'—':'');
+  const s2 = m.team2.score||(m.status==='upcoming'?'—':'');
+  const ov1 = isCricket&&m.team1.overs?`<small style="font-size:0.6rem;color:var(--muted);display:block">(${m.team1.overs} ov)</small>`:'';
+  const ov2 = isCricket&&m.team2.overs?`<small style="font-size:0.6rem;color:var(--muted);display:block">(${m.team2.overs} ov)</small>`:'';
+  return `<div class="${cardClass}">
+    <div class="match-card-top">
+      <div class="match-league">${m.leagueIcon} ${m.league}</div>
+      <div class="match-status ${statusClass}">${statusLabel}</div>
+    </div>
+    <div class="match-teams">
+      <div class="match-team">
+        <div class="team-flag">${m.team1.flag}</div>
+        <div class="team-name">${m.team1.name}</div>
+        <div class="team-score${s1==='—'?' no-score':''}">${s1}${ov1}</div>
+      </div>
+      <div class="match-vs">
+        <div class="vs-text">VS</div>
+        <div class="match-time">${m.time}</div>
+      </div>
+      <div class="match-team">
+        <div class="team-flag">${m.team2.flag}</div>
+        <div class="team-name">${m.team2.name}</div>
+        <div class="team-score${s2==='—'?' no-score':''}">${s2}${ov2}</div>
+      </div>
+    </div>
+    <div class="match-card-footer">
+      <div class="match-venue">📍 ${m.venue}</div>
+      <div class="match-overs">${m.detail}</div>
+    </div>
+  </div>`;
+}
+
+function makeStandingsTable(standings){
+  if(!standings.length) return '';
+  return `<div class="standings-wrap">
+    <table class="standings-table">
+      <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>D</th><th>Pts</th><th>Form</th></tr></thead>
+      <tbody>${standings.map(t=>`
+        <tr class="rank-${t.rank}">
+          <td><span class="rank-num">${t.rank}</span></td>
+          <td><div class="team-cell">${t.team}</div></td>
+          <td>${t.p}</td><td>${t.w}</td><td>${t.l}</td><td>${t.d}</td>
+          <td><span class="pts-cell">${t.pts}</span></td>
+          <td><div class="form-dots">${(t.form||[]).map(f=>`<div class="form-dot ${f==='W'?'form-w':f==='L'?'form-l':'form-d'}" title="${f}"></div>`).join('')}</div></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderSportsData(data){
+  const icon = currentSport==='cricket'?'🏏':'⚽';
+  const tableTitle = currentSport==='cricket'?'🏆 ICC Test Rankings':'🏆 Premier League Table';
+  let html='';
+
+  if(data.live.length){
+    html+=`<div class="sports-section-title">${icon} Live Now <span class="stag stag-live">Live</span></div>
+    <div class="matches-grid">${data.live.map(makeMatchCard).join('')}</div>`;
+  }
+  if(data.upcoming.length){
+    html+=`<div class="sports-section-title">📅 Upcoming <span class="stag stag-upcoming">Soon</span></div>
+    <div class="matches-grid">${data.upcoming.map(makeMatchCard).join('')}</div>`;
+  }
+  if(data.finished.length){
+    html+=`<div class="sports-section-title">✅ Recent Results <span class="stag stag-finished">FT</span></div>
+    <div class="matches-grid">${data.finished.map(makeMatchCard).join('')}</div>`;
+  }
+  if(!data.live.length&&!data.upcoming.length&&!data.finished.length){
+    html+=`<div class="empty"><div class="icon">${icon}</div><h3>কোনো match পাওয়া যায়নি</h3><p>একটু পরে আবার try করো</p></div>`;
+  }
+  if(data.standings.length){
+    html+=`<div class="sports-section-title">${tableTitle}</div>${makeStandingsTable(data.standings)}`;
+  }
+
+  document.getElementById('sportsContent').innerHTML=html;
+  stampNow();
+}
+
+// ── Tab switch ──
+function setSportTab(sport, btn){
+  currentSport=sport;
+  document.querySelectorAll('.sport-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadSportsData();
+}
+
+// ── Main loader ──
+async function loadSportsData(){
+  showSkel();
+  try{
+    const data = currentSport==='cricket' ? await fetchCricket() : await fetchFootball();
+    sportsCache[currentSport]=data;
+    renderSportsData(data);
+  }catch(e){
+    document.getElementById('sportsContent').innerHTML=
+      `<div class="empty"><div class="icon">⚠️</div><h3>Data load হয়নি</h3><p>${e.message}</p>
+      <button onclick="loadSportsData()" style="margin-top:1rem;background:var(--green);color:#000;border:none;padding:0.5rem 1.2rem;border-radius:8px;font-weight:700;cursor:pointer;">🔄 Retry</button></div>`;
+  }
+}
+
+// ── Refresh button ──
+function refreshSports(){
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  sportsCache[currentSport]=null;
+  loadSportsData().finally(()=>btn.classList.remove('spinning'));
+}
+
+// ── Auto refresh every 60s ──
+function startAutoRefresh(){
+  if(sportsAutoRefresh) clearInterval(sportsAutoRefresh);
+  sportsAutoRefresh=setInterval(()=>{
+    if(document.getElementById('sports').classList.contains('active')){
+      loadSportsData();
+    }
+  },60000);
+}
+
+// Sports page hooks handled in main showPage
+</script>
+
+<script>
+// ===== LIVE TV =====
+let currentTVCat = 'All';
+
+let currentTVCat = 'All';
+
+const TV_CHANNELS = [
+  // ── Sports ──
+  {id:1, name:'Star Sports 1', logo:'⭐', cat:'Sports', quality:'HD', now:'Live Cricket',
+   stream:'https://v.norosports.ir/live/starsports1/index.m3u8', type:'hls'},
+  {id:2, name:'ESPN', logo:'🏈', cat:'Sports', quality:'HD', now:'Sports Live',
+   stream:'https://v.norosports.ir/live/espn/index.m3u8', type:'hls'},
+  {id:3, name:'Sky Sports', logo:'🏟️', cat:'Sports', quality:'HD', now:'Premier League',
+   stream:'https://v.norosports.ir/live/skysports/index.m3u8', type:'hls'},
+  {id:4, name:'beIN Sports 1', logo:'⚽', cat:'Sports', quality:'HD', now:'La Liga Live',
+   stream:'https://v.norosports.ir/live/bein1/index.m3u8', type:'hls'},
+  {id:5, name:'T Sports BD', logo:'🏏', cat:'Sports', quality:'HD', now:'Bangladesh Cricket',
+   stream:'https://mn-nl.mncdn.com/tvchannel_264/smil:tvchannel_264.smil/playlist.m3u8', type:'hls'},
+
+  // ── News ──
+  {id:6, name:'BBC News', logo:'🇬🇧', cat:'News', quality:'HD', now:'World News Live',
+   stream:'https://vs-hls-push-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_news_channel_hd/pc_hd_abr_v2.m3u8', type:'hls'},
+  {id:7, name:'Al Jazeera', logo:'🌍', cat:'News', quality:'HD', now:'World Report',
+   stream:'https://live-hls-web-aje.getaj.net/AJE/03.m3u8', type:'hls'},
+  {id:8, name:'DW News', logo:'🇩🇪', cat:'News', quality:'HD', now:'Europe Tonight',
+   stream:'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8', type:'hls'},
+  {id:9, name:'France 24 EN', logo:'🇫🇷', cat:'News', quality:'HD', now:'International News',
+   stream:'https://stream.france24.com/hls/live/2037086/F24_EN_LO_HLS/master.m3u8', type:'hls'},
+  {id:10, name:'CNN', logo:'📡', cat:'News', quality:'HD', now:'Breaking News',
+   stream:'https://cnn-cnninternational-1-us.samsung.wurl.tv/manifest/playlist.m3u8', type:'hls'},
+
+  // ── Entertainment ──
+  {id:11, name:'Boishakhi TV', logo:'🌸', cat:'Entertainment', quality:'HD', now:'Bangla Natok',
+   stream:'https://mn-nl.mncdn.com/tvchannel_263/smil:tvchannel_263.smil/playlist.m3u8', type:'hls'},
+  {id:12, name:'ATN Bangla', logo:'🔵', cat:'Entertainment', quality:'HD', now:'Bangla Programme',
+   stream:'https://mn-nl.mncdn.com/tvchannel_279/smil:tvchannel_279.smil/playlist.m3u8', type:'hls'},
+  {id:13, name:'Deepto TV', logo:'💡', cat:'Entertainment', quality:'HD', now:'Drama Live',
+   stream:'https://mn-nl.mncdn.com/tvchannel_281/smil:tvchannel_281.smil/playlist.m3u8', type:'hls'},
+  {id:14, name:'ZEE TV', logo:'📺', cat:'Entertainment', quality:'HD', now:'Hindi Serial',
+   stream:'https://v.norosports.ir/live/zeetv/index.m3u8', type:'hls'},
+  {id:15, name:'Sony LIV', logo:'🎭', cat:'Entertainment', quality:'HD', now:'Sony Live',
+   stream:'https://v.norosports.ir/live/sonytv/index.m3u8', type:'hls'},
+
+  // ── Kids ──
+  {id:16, name:'Baby TV', logo:'🍼', cat:'Kids', quality:'HD', now:'Nursery Rhymes',
+   stream:'https://cbcrcnative-cbcrcnativekids-1-ca.samsung.wurl.tv/manifest/playlist.m3u8', type:'hls'},
+  {id:17, name:'Cartoon Network', logo:'🦸', cat:'Kids', quality:'HD', now:'Cartoons Live',
+   stream:'https://v.norosports.ir/live/cartoon/index.m3u8', type:'hls'},
+  {id:18, name:'Nick Jr', logo:'🧽', cat:'Kids', quality:'HD', now:'Kids Shows',
+   stream:'https://v.norosports.ir/live/nick/index.m3u8', type:'hls'},
+
+  // ── Music ──
+  {id:19, name:'MTV Hits', logo:'🎸', cat:'Music', quality:'HD', now:'Top Chart Show',
+   stream:'https://cbcrcnative-cbcrcnativemusic-1-ca.samsung.wurl.tv/manifest/playlist.m3u8', type:'hls'},
+  {id:20, name:'Gaan Bangla', logo:'🎶', cat:'Music', quality:'HD', now:'Bangla Hits',
+   stream:'https://mn-nl.mncdn.com/tvchannel_286/smil:tvchannel_286.smil/playlist.m3u8', type:'hls'},
+];
+
+function setTVCat(cat, btn){
+  currentTVCat = cat;
+  document.querySelectorAll('.tv-cat').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTVGrid();
+}
+
+function renderTVGrid(){
+  const grid = document.getElementById('tvGrid');
+  if(!grid) return;
+  const list = currentTVCat==='All' ? TV_CHANNELS : TV_CHANNELS.filter(c=>c.cat===currentTVCat);
+  if(!list.length){
+    grid.innerHTML=`<div class="tv-empty" style="grid-column:1/-1"><div class="icon">📺</div><p>No channels in this category</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map((ch,i)=>`
+    <div class="ch-card" onclick="openTVModal(${ch.id})" style="animation:fadeSlideUp 0.4s ease ${i*0.05}s both">
+      <div class="ch-thumb">
+        <div class="ch-live-tag"><span class="reddot"></span>LIVE</div>
+        <div class="ch-logo">${ch.logo}</div>
+        <div class="ch-play">
+          <div class="play-circle">
+            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="ch-body">
+        <div class="ch-name">${ch.name}</div>
+        <div class="ch-meta">
+          <span class="ch-cat-tag">${ch.cat}</span>
+          <span class="ch-quality">${ch.quality}</span>
+        </div>
+        <div class="ch-now">▶ ${ch.now}</div>
+      </div>
+    </div>`).join('');
+}
+
+let hlsInstance = null;
+
+function openTVModal(id){
+  const ch = TV_CHANNELS.find(c=>c.id===id);
+  if(!ch) return;
+  document.getElementById('tvModalLogo').textContent = ch.logo;
+  document.getElementById('tvModalName').textContent = ch.name;
+  document.getElementById('tvModalNow').innerHTML = `▶ <b style="color:var(--text)">${ch.now}</b>`;
+  document.getElementById('tvModalCat').textContent = ch.cat + ' • ' + ch.quality;
+
+  const wrap = document.getElementById('tvPlayerWrap');
+  wrap.innerHTML = `
+    <video id="tvVideo" controls autoplay playsinline
+      style="position:absolute;inset:0;width:100%;height:100%;background:#000;">
+    </video>
+    <div id="tvLoadMsg" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.8rem;pointer-events:none;">
+      <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:#ff2d55;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+      <p style="color:var(--muted);font-size:0.8rem;">Loading stream...</p>
+    </div>`;
+
+  const video = document.getElementById('tvVideo');
+  video.addEventListener('playing', ()=>{
+    const msg = document.getElementById('tvLoadMsg');
+    if(msg) msg.style.display='none';
+  });
+
+  // Destroy previous HLS instance
+  if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
+
+  if(Hls.isSupported()){
+    hlsInstance = new Hls({ enableWorker:true, lowLatencyMode:true });
+    hlsInstance.loadSource(ch.stream);
+    hlsInstance.attachMedia(video);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, ()=>video.play().catch(()=>{}));
+    hlsInstance.on(Hls.Events.ERROR, (e,data)=>{
+      if(data.fatal) showStreamError(wrap, ch);
+    });
+  } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+    // Safari native HLS
+    video.src = ch.stream;
+    video.play().catch(()=>{});
+  } else {
+    showStreamError(wrap, ch);
+  }
+
+  document.getElementById('tvModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function showStreamError(wrap, ch){
+  wrap.innerHTML = `
+    <div class="tv-no-stream">
+      <div class="big-icon">📡</div>
+      <p style="color:var(--muted);font-size:0.82rem;text-align:center;max-width:260px;line-height:1.5;">
+        এই channel টা এখন available নেই বা geo-blocked।<br>
+        অন্য channel try করো।
+      </p>
+    </div>`;
+}
+
+function closeTVModal(){
+  if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
+  document.getElementById('tvModal').classList.remove('open');
+  document.getElementById('tvPlayerWrap').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeTVModal(); });
+</script>
+
+<script>
+// ===== PREMIUM PARTICLES =====
+(function(){
+  const canvas = document.getElementById('particleCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  let W, H, particles = [];
+
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const COLORS = [
+    'rgba(0,230,118,',   // green
+    'rgba(0,229,255,',   // cyan
+    'rgba(124,58,237,',  // purple
+  ];
+
+  function Particle(){
+    this.reset = function(){
+      this.x = Math.random() * W;
+      this.y = Math.random() * H;
+      this.r = Math.random() * 1.5 + 0.3;
+      this.speedX = (Math.random() - 0.5) * 0.3;
+      this.speedY = (Math.random() - 0.5) * 0.3 - 0.1;
+      this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.alpha = Math.random() * 0.4 + 0.1;
+      this.alphaDir = (Math.random() - 0.5) * 0.003;
+      this.life = 0;
+      this.maxLife = Math.random() * 300 + 200;
+    };
+    this.reset();
+    this.life = Math.random() * this.maxLife; // stagger start
+  }
+
+  // Create particles based on screen size — optimized
+  const COUNT = Math.min(60, Math.floor(W * H / 20000));
+  for(let i = 0; i < COUNT; i++) particles.push(new Particle());
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+
+    particles.forEach(p => {
+      p.x += p.speedX;
+      p.y += p.speedY;
+      p.alpha += p.alphaDir;
+      p.life++;
+
+      if(p.alpha <= 0) p.alphaDir = Math.abs(p.alphaDir);
+      if(p.alpha >= 0.5) p.alphaDir = -Math.abs(p.alphaDir);
+
+      // Reset if out of bounds or max life
+      if(p.x < -10 || p.x > W+10 || p.y < -10 || p.y > H+10 || p.life > p.maxLife){
+        p.reset();
+      }
+
+      // Draw glow particle
+      const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+      grd.addColorStop(0, p.color + p.alpha + ')');
+      grd.addColorStop(1, p.color + '0)');
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      // Core dot
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + (p.alpha * 2) + ')';
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  // Use requestIdleCallback for performance
+  if('requestIdleCallback' in window){
+    requestIdleCallback(() => draw());
+  } else {
+    setTimeout(draw, 100);
+  }
+})();
+</script>
+
+
+<!-- Premium Floating Dock Navigation (Mobile) -->
+<div class="bottom-nav" role="navigation" aria-label="Main navigation">
+  <div class="bottom-nav-inner">
+
+    <button class="bnav-btn active" id="bnav-home" onclick="bnavClick('home')" aria-label="Home">
+      <span class="icon">🏠</span>
+      <span>Home</span>
+    </button>
+
+    <button class="bnav-btn" id="bnav-search" onclick="bnavSearch()" aria-label="Search">
+      <span class="icon">🔍</span>
+      <span>Search</span>
+    </button>
+
+    <div class="bnav-sep" aria-hidden="true"></div>
+
+    <a class="bnav-btn bnav-tg" href="https://t.me/AraFaaaah" target="_blank" rel="noopener" aria-label="Join Telegram">
+      <span class="icon">✈️</span>
+      <span>Telegram</span>
+    </a>
+
+  </div>
+</div>
+
+<!-- Spacer for bottom nav -->
+<div class="bottom-nav-spacer"></div>
+
+<script>
+// Bottom nav logic
+function bnavClick(page){
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('bnav-'+page)?.classList.add('active');
+  showPage(page);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function bnavSearch(){
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('bnav-search').classList.add('active');
+  showPage('home');
+  setTimeout(()=>{
+    const inp = document.getElementById('searchInput');
+    if(inp){ inp.focus(); inp.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }, 200);
+}
+
+
+
+// Bottom nav active state handled in showPage
+</script>
+
+
+<script>
+// ===== TRENDING SECTION =====
+function renderTrending(apps){
+  const scroll = document.getElementById('trendingScroll');
+  const dotsEl = document.getElementById('scrollDots');
+  if(!scroll || !apps || !apps.length) return;
+
+  // Pick top 8 apps for trending
+  const trending = [...apps].slice(0,8);
+
+  scroll.innerHTML = trending.map((a,i) => {
+    const rating = a.rating || (4.0 + Math.random()*0.9).toFixed(1);
+    const dlCount = a.downloads||0;
+    const dlDisplay = dlCount>=1000 ? (dlCount/1000).toFixed(1)+'K' : dlCount||'New';
+    const isTop3 = i < 3;
+    return `
+    <div class="tcard" onclick="dlApp(${JSON.stringify(a.id)},'${a.link}','${a.title.replace(/'/g,"\'")}')">
+      <div class="tcard-img">
+        <span class="trending-badge">🔥 Hot</span>
+        <span class="rank-badge ${isTop3?'top':'}'}">#${i+1}</span>
+        ${a.icon
+          ? `<img src="${a.icon}" alt="${a.title}" onerror="this.outerHTML='<span class=\"emoji\">${catEmoji(a.category)}</span>'">`
+          : `<span class="emoji">${catEmoji(a.category)}</span>`}
+      </div>
+      <div class="tcard-body">
+        <div class="tcard-name">${a.title}</div>
+        <div class="tcard-meta">
+          <span class="tcard-rating">★ ${rating}</span>
+          <span>⬇️ ${dlDisplay}</span>
+        </div>
+        <button class="tcard-dl-btn" onclick="event.stopPropagation();dlApp(${JSON.stringify(a.id)},'${a.link}','${a.title.replace(/'/g,"\'")}')">
+          ⬇️ Get
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Scroll dots
+  const dotCount = Math.min(trending.length, 5);
+  dotsEl.innerHTML = Array.from({length:dotCount},(_,i)=>
+    `<div class="scroll-dot ${i===0?'active':''}" onclick="scrollToCard(${i})"></div>`
+  ).join('');
+
+  // Update dots on scroll
+  scroll.addEventListener('scroll', ()=>{
+    const idx = Math.round(scroll.scrollLeft / 152);
+    document.querySelectorAll('.scroll-dot').forEach((d,i)=>{
+      d.classList.toggle('active', i===idx);
+    });
+  });
+}
+
+function scrollToCard(idx){
+  const scroll = document.getElementById('trendingScroll');
+  scroll.scrollTo({left: idx * 152, behavior:'smooth'});
+}
+
+// Hook into loadApps to also render trending
+const _origLoadApps = window.loadApps;
+window.loadApps = async function(){
+  await _origLoadApps?.();
+};
+
+// Also render trending when allApps is ready
+const _origRenderApps = window.renderApps;
+window.renderApps = function(search=''){
+  _origRenderApps?.(search);
+  if(window.allApps?.length){
+    renderTrending(window.allApps);
+  }
+};
+
+// ===== APP DETAIL MODAL =====
+function openAppModal(app){
+  const modal = document.getElementById('appDetailModal');
+  document.getElementById('modalTitle').textContent = app.title;
+  document.getElementById('modalCat').textContent = catEmoji(app.category) + ' ' + (app.category||'App');
+  document.getElementById('modalVer').textContent = '📦 v' + (app.version||'1.0.0');
+  document.getElementById('modalSize').textContent = app.size ? '💾 ' + app.size : '';
+  const dl = app.downloads||0;
+  document.getElementById('modalDl').textContent = '⬇️ ' + (dl>=1000?(dl/1000).toFixed(1)+'K':dl||'New') + ' Downloads';
+  document.getElementById('modalDesc').textContent = app.description || 'No description available.';
+  const iconEl = document.getElementById('modalIcon');
+  iconEl.innerHTML = app.icon
+    ? `<img src="${app.icon}" alt="${app.title}" onerror="this.outerHTML='<span class=\\"emoji\\">${catEmoji(app.category)}</span>'">`
+    : `<span class="emoji">${catEmoji(app.category)}</span>`;
+  const dlBtn = document.getElementById('modalDlBtn');
+  dlBtn.onclick = () => {
+    dlApp(app.id, app.link, app.title);
+    closeAppModal();
+  };
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeAppModal(){
+  document.getElementById('appDetailModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeAppModal(); });
+</script>
+
+<!-- ===== PWA INSTALL BANNER ===== -->
+<div class="pwa-banner" id="pwaBanner">
+  <div class="pwa-banner-icon">📦</div>
+  <div class="pwa-banner-text">
+    <div class="pwa-banner-title">HelloPepo Install করো!</div>
+    <div class="pwa-banner-sub">Home screen এ add করো — exactly app এর মতো!</div>
+  </div>
+  <div class="pwa-banner-actions">
+    <button class="pwa-install-btn" id="pwaInstallBtn">Install</button>
+    <button class="pwa-dismiss-btn" onclick="dismissPWA()">✕</button>
+  </div>
+</div>
+
+<!-- Scroll to top -->
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">↑</button>
+
+<script>
+// ===== PWA: Service Worker =====
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+// ===== PWA: Install Prompt =====
+let _deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  _deferredPrompt = e;
+  // Show banner after 3 seconds if not dismissed before
+  if(!localStorage.getItem('pwa_dismissed')){
+    setTimeout(()=>{
+      document.getElementById('pwaBanner').classList.add('show');
+    }, 3000);
+  }
+});
+
+document.getElementById('pwaInstallBtn').addEventListener('click', async ()=>{
+  if(!_deferredPrompt){ return; }
+  _deferredPrompt.prompt();
+  const { outcome } = await _deferredPrompt.userChoice;
+  _deferredPrompt = null;
+  document.getElementById('pwaBanner').classList.remove('show');
+  if(outcome === 'accepted'){
+    toast('HelloPepo install হয়েছে! 🎉');
+  }
+});
+
+function dismissPWA(){
+  document.getElementById('pwaBanner').classList.remove('show');
+  localStorage.setItem('pwa_dismissed', '1');
+}
+
+// Hide banner if already installed
+window.addEventListener('appinstalled', ()=>{
+  document.getElementById('pwaBanner').classList.remove('show');
+});
+
+// ===== SCROLL TO TOP =====
+const scrollBtn = document.getElementById('scrollTopBtn');
+window.addEventListener('scroll', ()=>{
+  scrollBtn.classList.toggle('show', window.scrollY > 400);
+}, {passive:true});
+</script>
+
+
+<script>
+// ===== AI TOOLS DATA =====
+const AI_TOOLS = [
+  {
+    id:1, name:'ChatGPT', category:'Chatbot',
+    logo:'🤖',
+    color:'rgba(16,163,127,0.15)',
+    border:'rgba(16,163,127,0.3)',
+    desc:'OpenAI এর সবচেয়ে popular AI chatbot। লেখা, কোড, analysis সব কিছু করে।',
+    url:'https://chat.openai.com'
+  },
+  {
+    id:2, name:'Gemini', category:'Chatbot',
+    logo:'✨',
+    color:'rgba(66,133,244,0.15)',
+    border:'rgba(66,133,244,0.3)',
+    desc:'Google এর শক্তিশালী AI। multimodal — text, image, code সব বোঝে।',
+    url:'https://gemini.google.com'
+  },
+  {
+    id:3, name:'Claude', category:'Chatbot',
+    logo:'🧠',
+    color:'rgba(207,123,59,0.15)',
+    border:'rgba(207,123,59,0.3)',
+    desc:'Anthropic এর Claude — সবচেয়ে smart ও safe AI assistant।',
+    url:'https://claude.ai'
+  },
+  {
+    id:4, name:'Canva AI', category:'Image AI',
+    logo:'🎨',
+    color:'rgba(0,200,81,0.15)',
+    border:'rgba(0,200,81,0.3)',
+    desc:'Design ও AI image generation এর জন্য সেরা tool। সহজে graphics বানাও।',
+    url:'https://canva.com'
+  },
+  {
+    id:5, name:'Leonardo AI', category:'Image AI',
+    logo:'🖼️',
+    color:'rgba(147,51,234,0.15)',
+    border:'rgba(147,51,234,0.3)',
+    desc:'Professional AI image ও art generation। Game asset, illustration সব বানানো যায়।',
+    url:'https://leonardo.ai'
+  },
+  {
+    id:6, name:'Suno AI', category:'Video AI',
+    logo:'🎵',
+    color:'rgba(236,72,153,0.15)',
+    border:'rgba(236,72,153,0.3)',
+    desc:'Text থেকে music তৈরি করে। যেকোনো genre এর গান বানাও seconds এ।',
+    url:'https://suno.com'
+  },
+  {
+    id:7, name:'GitHub Copilot', category:'Coding AI',
+    logo:'💻',
+    color:'rgba(100,100,100,0.15)',
+    border:'rgba(150,150,150,0.3)',
+    desc:'AI-powered code completion। যেকোনো language এ দ্রুত code লেখো।',
+    url:'https://github.com/features/copilot'
+  },
+  {
+    id:8, name:'Midjourney', category:'Image AI',
+    logo:'🌌',
+    color:'rgba(99,102,241,0.15)',
+    border:'rgba(99,102,241,0.3)',
+    desc:'সবচেয়ে realistic AI image generator। Photorealistic art এর জন্য সেরা।',
+    url:'https://midjourney.com'
+  },
+  {
+    id:9, name:'Copy.ai', category:'Marketing AI',
+    logo:'📢',
+    color:'rgba(245,158,11,0.15)',
+    border:'rgba(245,158,11,0.3)',
+    desc:'Marketing copy, ad text, social media post AI দিয়ে লেখো instantly।',
+    url:'https://copy.ai'
+  },
+  {
+    id:10, name:'Cursor AI', category:'Coding AI',
+    logo:'⚡',
+    color:'rgba(0,229,255,0.15)',
+    border:'rgba(0,229,255,0.3)',
+    desc:'AI-first code editor। পুরো codebase বুঝে suggestion দেয়। VS Code এর মতো।',
+    url:'https://cursor.sh'
+  },
+  {
+    id:11, name:'Runway ML', category:'Video AI',
+    logo:'🎬',
+    color:'rgba(239,68,68,0.15)',
+    border:'rgba(239,68,68,0.3)',
+    desc:'AI video generation ও editing। Text থেকে video বানাও professional quality তে।',
+    url:'https://runwayml.com'
+  },
+  {
+    id:12, name:'Jasper AI', category:'Marketing AI',
+    logo:'🚀',
+    color:'rgba(16,185,129,0.15)',
+    border:'rgba(16,185,129,0.3)',
+    desc:'AI marketing content platform। Blog, email, ad copy সব লেখে automatically।',
+    url:'https://jasper.ai'
+  },
+];
+
+let aiCat = 'All';
+
+function setAICat(cat, btn){
+  aiCat = cat;
+  document.querySelectorAll('.ai-cat').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterAI();
+}
+
+function filterAI(){
+  const search = (document.getElementById('aiSearch')?.value||'').toLowerCase();
+  let list = AI_TOOLS;
+  if(aiCat!=='All') list = list.filter(t=>t.category===aiCat);
+  if(search) list = list.filter(t=>
+    t.name.toLowerCase().includes(search)||
+    t.desc.toLowerCase().includes(search)||
+    t.category.toLowerCase().includes(search)
+  );
+  renderAI(list);
+}
+
+function renderAI(list){
+  const grid = document.getElementById('aiGrid');
+  if(!grid) return;
+
+  if(!list.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:0.8rem">🔍</div><p>কোনো AI tool পাওয়া যায়নি</p></div>';
+    return;
+  }
+
+  grid.innerHTML = list.map((t,i)=>`
+    <div class="ai-card" style="animation-delay:${i*0.05}s;--card-color:${t.color}">
+      <div class="ai-card-head">
+        <div class="ai-logo" style="background:${t.color};border-color:${t.border}">
+          ${t.logo}
+        </div>
+        <div class="ai-card-info">
+          <div class="ai-tool-name">${t.name}</div>
+          <div class="ai-tool-cat">${t.category}</div>
+        </div>
+      </div>
+      <div class="ai-desc">${t.desc}</div>
+      <a class="ai-visit-btn" href="${t.url}" target="_blank" rel="noopener">
+        Visit Tool <span class="arrow">→</span>
+      </a>
+    </div>
+  `).join('');
+}
+
+// Init
+renderAI(AI_TOOLS);
+</script>
+
+
+<script>
+function toggleAllAI(btn){
+  btn.classList.toggle('active');
+  const isActive = btn.classList.contains('active');
+
+  if(isActive){
+    // Show all AI tools, reset filters
+    aiCat = 'All';
+    document.querySelectorAll('.ai-cat').forEach(b=>b.classList.remove('active'));
+    document.querySelector('.ai-cat').classList.add('active');
+    if(document.getElementById('aiSearch')) document.getElementById('aiSearch').value='';
+    renderAI(AI_TOOLS);
+    // Scroll to AI section
+    document.querySelector('.ai-section').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+</script>
+
+
+<!-- AI TOOL EDIT MODAL -->
+<div class="modal-overlay" id="aiEditModal" style="display:none" onclick="if(event.target===this)closeAIModal()">
+  <div class="modal">
+    <h3>✏️ AI Tool Edit করো</h3>
+    <input type="hidden" id="ai-edit-id"/>
+    <div class="ai-form-grid">
+      <div class="fg"><label>Tool Name</label><input type="text" id="ai-edit-name"/></div>
+      <div class="fg"><label>Category</label>
+        <select id="ai-edit-cat">
+          <option value="Chatbot">💬 Chatbot</option>
+          <option value="Image AI">🎨 Image AI</option>
+          <option value="Video AI">🎬 Video AI</option>
+          <option value="Coding AI">💻 Coding AI</option>
+          <option value="Marketing AI">📢 Marketing AI</option>
+        </select>
+      </div>
+      <div class="fg"><label>Logo Emoji</label><input type="text" id="ai-edit-logo"/></div>
+      <div class="fg"><label>Website URL</label><input type="url" id="ai-edit-url"/></div>
+      <div class="fg full"><label>Description</label><textarea id="ai-edit-desc"></textarea></div>
+    </div>
+    <div style="display:flex;gap:0.8rem;margin-top:1.2rem;flex-wrap:wrap">
+      <button class="btn-g" onclick="saveAIEdit()">💾 Save</button>
+      <button class="btn-o" onclick="closeAIModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ===== AI TOOLS FIREBASE SYSTEM =====
+
+// Default hardcoded AI tools (shown when Firebase loads)
+const DEFAULT_AI_TOOLS = [
+  {id:'d1',name:'ChatGPT',category:'Chatbot',logo:'🤖',desc:'OpenAI এর সবচেয়ে popular AI chatbot। লেখা, কোড, analysis সব কিছু করে।',url:'https://chat.openai.com',isDefault:true},
+  {id:'d2',name:'Gemini',category:'Chatbot',logo:'✨',desc:'Google এর শক্তিশালী AI। multimodal — text, image, code সব বোঝে।',url:'https://gemini.google.com',isDefault:true},
+  {id:'d3',name:'Claude',category:'Chatbot',logo:'🧠',desc:'Anthropic এর Claude — সবচেয়ে smart ও safe AI assistant।',url:'https://claude.ai',isDefault:true},
+  {id:'d4',name:'Canva AI',category:'Image AI',logo:'🎨',desc:'Design ও AI image generation এর জন্য সেরা tool।',url:'https://canva.com',isDefault:true},
+  {id:'d5',name:'Leonardo AI',category:'Image AI',logo:'🖼️',desc:'Professional AI image ও art generation। Game asset, illustration সব বানানো যায়।',url:'https://leonardo.ai',isDefault:true},
+  {id:'d6',name:'Suno AI',category:'Video AI',logo:'🎵',desc:'Text থেকে music তৈরি করে। যেকোনো genre এর গান বানাও seconds এ।',url:'https://suno.com',isDefault:true},
+  {id:'d7',name:'GitHub Copilot',category:'Coding AI',logo:'💻',desc:'AI-powered code completion। যেকোনো language এ দ্রুত code লেখো।',url:'https://github.com/features/copilot',isDefault:true},
+  {id:'d8',name:'Midjourney',category:'Image AI',logo:'🌌',desc:'সবচেয়ে realistic AI image generator। Photorealistic art এর জন্য সেরা।',url:'https://midjourney.com',isDefault:true},
+  {id:'d9',name:'Copy.ai',category:'Marketing AI',logo:'📢',desc:'Marketing copy, ad text, social media post AI দিয়ে লেখো instantly।',url:'https://copy.ai',isDefault:true},
+  {id:'d10',name:'Cursor AI',category:'Coding AI',logo:'⚡',desc:'AI-first code editor। পুরো codebase বুঝে suggestion দেয়।',url:'https://cursor.sh',isDefault:true},
+  {id:'d11',name:'Runway ML',category:'Video AI',logo:'🎬',desc:'AI video generation ও editing। Text থেকে video বানাও।',url:'https://runwayml.com',isDefault:true},
+  {id:'d12',name:'Jasper AI',category:'Marketing AI',logo:'🚀',desc:'AI marketing content platform। Blog, email, ad copy সব লেখে।',url:'https://jasper.ai',isDefault:true},
+];
+
+let allAITools = [...DEFAULT_AI_TOOLS];
+let aiUnsubscribe = null;
+
+// Load AI tools from Firebase realtime
+function loadAIToolsFromFirebase(){
+  if(!window._fbReady){
+    window.addEventListener('fb-ready', loadAIToolsFromFirebase, {once:true});
+    return;
+  }
+
+  const { collection, onSnapshot, orderBy, query } = window._fbModules;
+  const db = window._fbDB;
+
+  if(aiUnsubscribe) aiUnsubscribe();
+
+  aiUnsubscribe = onSnapshot(
+    query(collection(db,'ai_tools'), orderBy('createdAt','desc')),
+    (snapshot) => {
+      const fbTools = snapshot.docs.map(d=>({id:d.id,...d.data()}));
+      // Merge: defaults first, then Firebase added tools
+      const defaultIds = DEFAULT_AI_TOOLS.map(t=>t.id);
+      allAITools = [...DEFAULT_AI_TOOLS, ...fbTools.filter(t=>!defaultIds.includes(t.id))];
+
+      // Re-render AI section
+      if(typeof renderAI === 'function') renderAI(allAITools);
+      if(typeof filterAI === 'function') filterAI();
+
+      // Update admin list
+      renderAIAdminList(allAITools);
+      document.getElementById('aiToolCount') && (document.getElementById('aiToolCount').textContent = allAITools.length);
+    },
+    (err) => {
+      console.error('AI Firebase error:', err);
+      renderAI(DEFAULT_AI_TOOLS);
+    }
+  );
+}
+
+// Render AI Admin List
+function renderAIAdminList(tools){
+  const list = document.getElementById('aiAdminList');
+  if(!list) return;
+
+  if(!tools.length){
+    list.innerHTML='<div style="padding:2rem;text-align:center;color:var(--muted)">কোনো AI tool নেই</div>';
+    return;
+  }
+
+  list.innerHTML = tools.map(t=>`
+    <div class="ai-tool-row">
+      <div class="ai-tool-logo">${t.logo||'🤖'}</div>
+      <div class="ai-tool-info">
+        <div class="t">${t.name} ${t.isDefault?'<span style="font-size:0.6rem;color:var(--muted);font-weight:400">(default)</span>':''}</div>
+        <div class="m">${t.category} • <a href="${t.url}" target="_blank" style="color:var(--cyan);font-size:0.7rem">${t.url?.substring(0,30)}...</a></div>
+      </div>
+      <div class="app-row-actions">
+        <button class="edit-btn" onclick="openAIEdit('${t.id}')">✏️</button>
+        ${!t.isDefault ? `<button class="del-btn" onclick="deleteAITool('${t.id}','${t.name}')">🗑️</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// Add AI Tool
+async function addAITool(){
+  const name = document.getElementById('ai-name').value.trim();
+  const cat  = document.getElementById('ai-cat-select').value;
+  const logo = document.getElementById('ai-logo').value.trim() || '🤖';
+  const url  = document.getElementById('ai-url').value.trim();
+  const desc = document.getElementById('ai-desc').value.trim();
+
+  if(!name){ showToast('Tool name দাও!','error'); return; }
+  if(!url)  { showToast('Website URL দাও!','error'); return; }
+  if(!desc) { showToast('Description দাও!','error'); return; }
+
+  if(!window._fbReady){ showToast('Firebase ready নয়!','error'); return; }
+
+  const btn = document.getElementById('aiAddBtn');
+  btn.disabled=true; btn.textContent='⏳ Saving...';
+
+  try{
+    const { collection, addDoc, serverTimestamp } = window._fbModules;
+    await addDoc(collection(window._fbDB,'ai_tools'),{
+      name, category:cat, logo, url, desc,
+      createdAt: serverTimestamp()
+    });
+    clearAIForm();
+    showToast('"'+name+'" Firebase এ add হয়েছে! ✅');
+  }catch(e){
+    showToast('Error: '+e.message,'error');
+  }
+  btn.disabled=false; btn.textContent='➕ Add to Firebase';
+}
+
+function clearAIForm(){
+  ['ai-name','ai-logo','ai-url','ai-desc'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  const logo = document.getElementById('ai-logo');
+  if(logo) logo.value='🤖';
+}
+
+// Edit AI Tool
+let _editingAI = null;
+function openAIEdit(id){
+  const tool = allAITools.find(t=>t.id===id);
+  if(!tool) return;
+  _editingAI = tool;
+  document.getElementById('ai-edit-id').value = id;
+  document.getElementById('ai-edit-name').value = tool.name;
+  document.getElementById('ai-edit-cat').value = tool.category;
+  document.getElementById('ai-edit-logo').value = tool.logo||'🤖';
+  document.getElementById('ai-edit-url').value = tool.url;
+  document.getElementById('ai-edit-desc').value = tool.desc;
+  document.getElementById('aiEditModal').style.display='flex';
+}
+function closeAIModal(){ document.getElementById('aiEditModal').style.display='none'; _editingAI=null; }
+
+async function saveAIEdit(){
+  const id   = document.getElementById('ai-edit-id').value;
+  const name = document.getElementById('ai-edit-name').value.trim();
+  if(!name){ showToast('Tool name দাও!','error'); return; }
+
+  const updated = {
+    name,
+    category: document.getElementById('ai-edit-cat').value,
+    logo: document.getElementById('ai-edit-logo').value.trim()||'🤖',
+    url: document.getElementById('ai-edit-url').value.trim(),
+    desc: document.getElementById('ai-edit-desc').value.trim(),
+  };
+
+  if(_editingAI?.isDefault){
+    // For default tools — update locally only
+    const idx = allAITools.findIndex(t=>t.id===id);
+    if(idx>-1) allAITools[idx]={...allAITools[idx],...updated};
+    renderAI(allAITools);
+    renderAIAdminList(allAITools);
+    showToast('"'+name+'" updated! ✅');
+  } else if(window._fbReady){
+    const { doc, updateDoc } = window._fbModules;
+    await updateDoc(doc(window._fbDB,'ai_tools',id), updated);
+    showToast('"'+name+'" Firebase এ update হয়েছে! ✅');
+  }
+  closeAIModal();
+}
+
+// Delete AI Tool
+async function deleteAITool(id, name){
+  if(!confirm('"'+name+'" delete করবে?')) return;
+  if(!window._fbReady){ showToast('Firebase ready নয়!','error'); return; }
+  const { doc, deleteDoc } = window._fbModules;
+  await deleteDoc(doc(window._fbDB,'ai_tools',id));
+  showToast('"'+name+'" deleted!');
+}
+
+// Init Firebase AI Tools
+window.addEventListener('fb-ready', loadAIToolsFromFirebase);
+loadAIToolsFromFirebase();
+</script>
+
+
+<script>
+// ===== PREMIUM AI TABS =====
+function setAITab(btn, cat){
+  // Update active state
+  document.querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  aiCat = cat;
+
+  // Move sliding indicator
+  moveTabIndicator(btn);
+
+  // Filter with animation
+  filterAIAnimated();
+}
+
+function moveTabIndicator(activeTab){
+  const indicator = document.getElementById('aiTabIndicator');
+  const tabs = document.getElementById('aiTabs');
+  if(!indicator || !activeTab || !tabs) return;
+
+  const tabRect = activeTab.getBoundingClientRect();
+  const tabsRect = tabs.getBoundingClientRect();
+  const scrollLeft = tabs.scrollLeft;
+
+  indicator.style.width = activeTab.offsetWidth + 'px';
+  indicator.style.left = (activeTab.offsetLeft) + 'px';
+
+  // Scroll tab into view on mobile
+  const tabLeft = activeTab.offsetLeft;
+  const tabRight = tabLeft + activeTab.offsetWidth;
+  const visibleLeft = tabs.scrollLeft;
+  const visibleRight = visibleLeft + tabs.offsetWidth;
+
+  if(tabLeft < visibleLeft + 20){
+    tabs.scrollTo({left: tabLeft - 10, behavior:'smooth'});
+  } else if(tabRight > visibleRight - 20){
+    tabs.scrollTo({left: tabRight - tabs.offsetWidth + 10, behavior:'smooth'});
+  }
+}
+
+function filterAIAnimated(){
+  const grid = document.getElementById('aiGrid');
+  if(!grid) return;
+
+  // Fade out
+  grid.style.opacity = '0';
+  grid.style.transform = 'translateY(8px)';
+  grid.style.transition = 'all 0.15s ease';
+
+  setTimeout(()=>{
+    filterAI();
+    // Fade in
+    grid.style.opacity = '1';
+    grid.style.transform = 'translateY(0)';
+  }, 150);
+}
+
+function updateTabCounts(tools){
+  const counts = {
+    'all': tools.length,
+    'chatbot': tools.filter(t=>t.category==='Chatbot').length,
+    'image': tools.filter(t=>t.category==='Image AI').length,
+    'video': tools.filter(t=>t.category==='Video AI').length,
+    'coding': tools.filter(t=>t.category==='Coding AI').length,
+    'marketing': tools.filter(t=>t.category==='Marketing AI').length,
+  };
+  Object.entries(counts).forEach(([k,v])=>{
+    const el = document.getElementById('tc-'+k);
+    if(el) el.textContent = v;
+  });
+}
+
+// Override setAICat to use new tab system
+const _origSetAICat = window.setAICat;
+window.setAICat = function(cat, btn){
+  aiCat = cat;
+  filterAI();
+};
+
+// Override renderAI to also update counts
+const _baseRenderAI = window.renderAI;
+window.renderAI = function(tools){
+  _baseRenderAI && _baseRenderAI(tools);
+  updateTabCounts(tools || window.allAITools || []);
+};
+
+// Init indicator position on load
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    const firstTab = document.querySelector('.ai-tab.active');
+    if(firstTab) moveTabIndicator(firstTab);
+  }, 300);
+});
+
+// Also init after AI tools load
+window.addEventListener('fb-ready', ()=>{
+  setTimeout(()=>{
+    const firstTab = document.querySelector('.ai-tab.active');
+    if(firstTab) moveTabIndicator(firstTab);
+  }, 800);
+});
+</script>
+
+</body>
+</html>
