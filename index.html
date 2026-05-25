@@ -1239,7 +1239,6 @@
     .modal-site-promo{text-align:center;margin-top:0.85rem;font-size:0.78rem;color:var(--muted);line-height:1.6;padding:0.75rem;background:rgba(0,230,118,0.04);border-radius:10px;border:1px solid rgba(0,230,118,0.1);}
     .modal-site-promo a{color:var(--green);text-decoration:none;font-weight:600;}
     .modal-site-promo a:hover{text-decoration:underline;}
-    }
 
 
     /* ===== PREMIUM UI EFFECTS ===== */
@@ -3103,7 +3102,7 @@
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot, orderBy, query, serverTimestamp, setDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBzD-TG1A7nD1_pc111nm1z5aCN6lgezPg",
@@ -3118,7 +3117,7 @@
     const db = getFirestore(fbApp);
 
     window._fbDB = db;
-    window._fbModules = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot, orderBy, query, serverTimestamp };
+    window._fbModules = { collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot, orderBy, query, serverTimestamp, setDoc, increment };
     window._fbReady = true;
     window.dispatchEvent(new Event('fb-ready'));
   </script>
@@ -3604,7 +3603,32 @@ document.addEventListener('click',(e)=>{
         <button class="btn-r" onclick="doLogout()">🚪 Logout</button>
       </div>
     </div>
-    <div class="dash-stats">
+    
+    <!-- NEW ANALYTICS SECTION -->
+    <div class="admin-analytics-section" style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem;">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:0.6rem;">📈 Live Analytics Analytics</h3>
+        <button class="btn-o" onclick="if(typeof loadAnalytics==='function') loadAnalytics()">🔄 Refresh</button>
+      </div>
+      
+      <div class="dash-stats" style="margin-bottom:1.5rem">
+        <div class="dash-stat"><div class="num" id="statTodayVisits">-</div><div class="label">📅 Today's Visits</div></div>
+        <div class="dash-stat"><div class="num" id="statVisits">-</div><div class="label">👁️ Total Visits</div></div>
+        <div class="dash-stat"><div class="num" id="statAdClicks">-</div><div class="label">💰 Ad Clicks</div></div>
+      </div>
+
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div>
+          <h4 style="font-size:0.9rem;color:var(--text);margin-bottom:0.8rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">🏆 Top Clicked Apps/Tools</h4>
+          <div id="topClicksList" style="display:flex;flex-direction:column;gap:0.5rem;max-height:200px;overflow-y:auto;">Loading...</div>
+        </div>
+        <div>
+          <h4 style="font-size:0.9rem;color:var(--text);margin-bottom:0.8rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">📅 Daily Visits (Last 7 Days)</h4>
+          <div id="dailyVisitsList" style="display:flex;flex-direction:column;gap:0.5rem;max-height:200px;overflow-y:auto;">Loading...</div>
+        </div>
+      </div>
+    </div>
+<div class="dash-stats">
       <div class="dash-stat"><div class="num" id="statTotal">-</div><div class="label">📦 Total Apps</div></div>
       <div class="dash-stat"><div class="num" id="statDl">-</div><div class="label">⬇️ Downloads</div></div>
     </div>
@@ -3715,13 +3739,13 @@ document.addEventListener('click',(e)=>{
 
   <!-- Sport Tabs -->
   <div class="sport-tabs">
-    <button class=\"sport-tab active\" id=\"stab-all\"     onclick=\"setSportTab('all',this)\">🌐 All Sports</button>
-    <button class=\"sport-tab\"        id=\"stab-football\" onclick=\"setSportTab('football',this)\">⚽ Football</button>
-    <button class=\"sport-tab\"        id=\"stab-cricket\"  onclick=\"setSportTab('cricket',this)\">🏏 Cricket</button>
-    <button class=\"sport-tab ipl-tab\" id=\"stab-ipl\"    onclick=\"setSportTab('ipl',this)\">🏏 Cricket Hub</button>
-    <button class=\"sport-tab\"        id=\"stab-upcoming\" onclick=\"setSportTab('upcoming',this)\">📅 Upcoming</button>
-    <button class=\"sport-tab\"        id=\"stab-finished\" onclick=\"setSportTab('finished',this)\">✅ Finished</button>
-    <button class=\"sport-tab fifa-tab\" id=\"stab-fifa\"   onclick=\"setSportTab('fifa',this)\">🌍 FIFA 2026</button>
+    <button class="sport-tab active" id="stab-all"     onclick="setSportTab('all',this)">🌐 All Sports</button>
+    <button class="sport-tab"        id="stab-football" onclick="setSportTab('football',this)">⚽ Football</button>
+    <button class="sport-tab"        id="stab-cricket"  onclick="setSportTab('cricket',this)">🏏 Cricket</button>
+    <button class="sport-tab ipl-tab" id="stab-ipl"    onclick="setSportTab('ipl',this)">🏏 Cricket Hub</button>
+    <button class="sport-tab"        id="stab-upcoming" onclick="setSportTab('upcoming',this)">📅 Upcoming</button>
+    <button class="sport-tab"        id="stab-finished" onclick="setSportTab('finished',this)">✅ Finished</button>
+    <button class="sport-tab fifa-tab" id="stab-fifa"   onclick="setSportTab('fifa',this)">🌍 FIFA 2026</button>
   </div>
 
   <!-- Refresh -->
@@ -4013,7 +4037,7 @@ function showPage(id){
 window.addEventListener('hashchange', checkHash);
 function checkHash(){
   if(location.hash==='#admin'){
-    if(isLoggedIn()) showPage('admin-dash');
+    if(isLoggedIn()) showPage('admin-dash'); if(typeof loadAnalytics==='function') {loadAnalytics();}
     else showPage('admin-login');
   }
 }
@@ -4097,14 +4121,14 @@ function renderApps(search=''){
     const dlDisplay = dlCount>=1000 ? (dlCount/1000).toFixed(1)+'K' : dlCount;
     const isNew = i < 2;
     return `
-    <div class="card" style="animation-delay:${i*0.06}s;cursor:pointer" onclick="openAppModal(${JSON.stringify(a).replace(/\"/g,'&quot;')})">
+    <div class="card" style="animation-delay:${i*0.06}s;cursor:pointer" onclick="openAppModal(${JSON.stringify(a).replace(/"/g,'&quot;')})">
       <div class="card-banner">
         <div class="card-banner-bg"></div>
         <span class="card-badge">${a.category}</span>
         ${isNew?'<span class="card-new">NEW</span>':''}
         <div class="card-icon-wrap">
           ${a.icon
-            ? `<img src="${a.icon}" alt="${a.title}" onerror="this.outerHTML='<span class=\"emoji\">${catEmoji(a.category)}</span>'">`
+            ? `<img src="${a.icon}" alt="${a.title}" onerror="this.outerHTML='<span class="emoji">${catEmoji(a.category)}</span>'">`
             : `<span class="emoji">${catEmoji(a.category)}</span>`}
         </div>
       </div>
@@ -4142,6 +4166,7 @@ function filterApps(){ renderApps(document.getElementById('searchInput').value);
 
 // ===== DOWNLOAD =====
 async function dlApp(id,link,title){
+  if(typeof trackEvent==='function') trackEvent('app_click', title);
   if(!link){ toast('Link নেই!','error'); return; }
   window.open(link,'_blank');
   toast('"'+title+'" download শুরু ⬇️');
@@ -4171,7 +4196,7 @@ function doLogin(){
   if(u===c.username && p===c.password){
     localStorage.setItem(AUTH_KEY,'true');
     location.hash='#admin';
-    showPage('admin-dash');
+    showPage('admin-dash'); if(typeof loadAnalytics==='function') {loadAnalytics();}
     toast('Login সফল! ✅');
   } else {
     toast('Username বা Password ভুল!','error');
@@ -4265,6 +4290,7 @@ function clearForm(){
 
 // ===== ADMIN LIST =====
 async function loadAdminApps(){
+  if(typeof loadAnalytics==='function') loadAnalytics();
   if(!isLoggedIn()) return;
   const sb=getSB();
   let apps=[];
@@ -5409,6 +5435,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 });
 
+</script>
 
 <script>
 // ===== LIVE TV =====
@@ -5897,7 +5924,7 @@ function renderTrending(apps){
         <span class="trending-badge">🔥 Hot</span>
         <span class="rank-badge ${isTop3?'top':'}'}">#${i+1}</span>
         ${a.icon
-          ? `<img src="${a.icon}" alt="${a.title}" onerror="this.outerHTML='<span class=\"emoji\">${catEmoji(a.category)}</span>'">`
+          ? `<img src="${a.icon}" alt="${a.title}" onerror="this.outerHTML='<span class="emoji">${catEmoji(a.category)}</span>'">`
           : `<span class="emoji">${catEmoji(a.category)}</span>`}
       </div>
       <div class="tcard-body">
@@ -5960,7 +5987,7 @@ function openAppModal(app){
   document.getElementById('modalDesc').textContent = app.description || 'No description available.';
   const iconEl = document.getElementById('modalIcon');
   iconEl.innerHTML = app.icon
-    ? `<img src="${app.icon}" alt="${app.title}" onerror="this.outerHTML='<span class=\\"emoji\\">${catEmoji(app.category)}</span>'">`
+    ? `<img src="${app.icon}" alt="${app.title}" onerror="this.outerHTML='<span class=\"emoji\">${catEmoji(app.category)}</span>'">`
     : `<span class="emoji">${catEmoji(app.category)}</span>`;
   const dlBtn = document.getElementById('modalDlBtn');
   dlBtn.onclick = () => {
@@ -6238,7 +6265,7 @@ function renderAI(list){
         </div>
       </div>
       <div class="ai-desc">${t.desc}</div>
-      <a class="ai-visit-btn" href="${t.url}" target="_blank" rel="noopener">
+      <a class="ai-visit-btn" href="${t.url}" target="_blank" rel="noopener" onclick="if(typeof trackEvent==='function') trackEvent('tool_visit', '${t.name}')">
         Visit Tool <span class="arrow">→</span>
       </a>
     </div>
@@ -6988,6 +7015,136 @@ async function deletePDF(id, name){
 // Init
 window.addEventListener('fb-ready', loadPDFsFromFirebase);
 loadPDFsFromFirebase();
+</script>
+
+<script>
+// Analytics Functions
+async function trackEvent(type, itemName = null) {
+  if(!window._fbReady) {
+    window.addEventListener('fb-ready', () => trackEvent(type, itemName), {once:true});
+    return;
+  }
+  const { doc, setDoc, increment } = window._fbModules;
+  const db = window._fbDB;
+  
+  const today = new Date();
+  const dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  
+  const docRef = doc(db, 'analytics_daily', dateStr);
+  try {
+    let updateData = {};
+    if (type === 'visit') {
+      const visited = sessionStorage.getItem('hp_visited_today');
+      if (visited !== dateStr) {
+        updateData = { visits: increment(1) };
+        sessionStorage.setItem('hp_visited_today', dateStr);
+      } else {
+        return; 
+      }
+    } else if (type === 'ad_click') {
+      updateData = { adClicks: increment(1) };
+    } else if (type === 'app_click' || type === 'tool_visit') {
+      const keyStr = "clicks." + itemName;
+      updateData = { [keyStr]: increment(1) };
+    }
+    
+    if (Object.keys(updateData).length > 0) {
+      await setDoc(docRef, updateData, { merge: true });
+    }
+  } catch(e) {
+    console.warn('Analytics failed:', e);
+  }
+}
+
+// Track Views
+trackEvent('visit');
+
+// Track Ad Clicks
+let blurHandler = function() {
+  setTimeout(() => {
+    if (document.activeElement instanceof HTMLIFrameElement) {
+      trackEvent('ad_click');
+    }
+  }, 100);
+};
+window.addEventListener('blur', blurHandler);
+
+// Admin load function
+async function loadAnalytics() {
+  if(!window._fbReady) return;
+  const { collection, getDocs, query } = window._fbModules;
+  const db = window._fbDB;
+  
+  document.getElementById('statVisits').textContent = '...';
+  document.getElementById('statAdClicks').textContent = '...';
+  document.getElementById('statTodayVisits').textContent = '...';
+  
+  try {
+    const q = query(collection(db, 'analytics_daily')); 
+    const snapshot = await getDocs(q);
+    
+    let totalVisits = 0;
+    let totalAdClicks = 0;
+    let todayVisits = 0;
+    
+    const d = new Date();
+    const today = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    
+    const clickMap = {};
+    const dailyData = [];
+
+    const allDocs = [];
+    snapshot.forEach(doc => allDocs.push({id: doc.id, data: doc.data()}));
+    allDocs.sort((a,b) => b.id.localeCompare(a.id));
+
+    allDocs.forEach(item => {
+      const date = item.id;
+      const data = item.data;
+      
+      const visits = data.visits || 0;
+      const adClicks = data.adClicks || 0;
+      const clicks = data.clicks || {};
+      
+      totalVisits += visits;
+      totalAdClicks += adClicks;
+      if(date === today) todayVisits = visits;
+      
+      if (dailyData.length < 7) {
+          dailyData.push({ date, visits });
+      }
+      
+      for (const [name, c] of Object.entries(clicks)) {
+          clickMap[name] = (clickMap[name] || 0) + c;
+      }
+    });
+    
+    document.getElementById('statVisits').textContent = totalVisits;
+    document.getElementById('statAdClicks').textContent = totalAdClicks;
+    document.getElementById('statTodayVisits').textContent = todayVisits;
+    
+    const topClicks = Object.entries(clickMap).sort((a,b)=>b[1]-a[1]).slice(0, 10);
+    const topList = document.getElementById('topClicksList');
+    if(topClicks.length) {
+        topList.innerHTML = topClicks.map(([name, c]) => {
+            return '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.05);padding:0.6rem 0.8rem;border-radius:8px;"><span style="font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:0.5rem" title="' + name + '">' + name + '</span><span style="color:var(--green);font-weight:700;font-size:0.85rem;white-space:nowrap">' + c + ' clicks</span></div>';
+        }).join('');
+    } else {
+        topList.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;text-align:center;padding:1rem;">No tracking data yet</div>';
+    }
+    
+    const dailyList = document.getElementById('dailyVisitsList');
+    if(dailyData.length) {
+        dailyList.innerHTML = dailyData.map(d => {
+            return '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.05);padding:0.6rem 0.8rem;border-radius:8px;"><span style="font-size:0.85rem">' + d.date + '</span><span style="color:var(--cyan);font-weight:700;font-size:0.85rem">' + d.visits + ' visits</span></div>';
+        }).join('');
+    } else {
+        dailyList.innerHTML = '<div style="color:var(--muted);font-size:0.8rem;text-align:center;padding:1rem;">No visit data yet</div>';
+    }
+    
+  } catch(e) {
+    console.error('Failed to load analytics:', e);
+  }
+}
 </script>
 
 </body>
